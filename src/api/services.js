@@ -39,6 +39,11 @@ export const publicAPI = {
   submitScore: (slug, data) => api.post(`/public/games/${slug}/score`, data),
   getLeaderboard: (slug) => api.get(`/public/games/${slug}/leaderboard`),
 
+  // Articles
+  getArticles: (params) => api.get('/public/articles', { params }),
+  getArticle: (slug) => api.get(`/public/articles/${slug}`),
+  getArticleCategories: () => api.get('/public/articles/categories'),
+
   // Health
   health: () => api.get('/health'),
 };
@@ -196,4 +201,11 @@ export const adminAPI = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   deleteMedia: (id) => api.delete(`/admin/media/${id}`),
+
+  // Articles
+  getArticles: (params) => api.get('/admin/articles', { params }),
+  getArticle: (id) => api.get(`/admin/articles/${id}`),
+  createArticle: (data) => api.post('/admin/articles', data),
+  updateArticle: (id, data) => api.put(`/admin/articles/${id}`, data),
+  deleteArticle: (id) => api.delete(`/admin/articles/${id}`),
 };
