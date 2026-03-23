@@ -35,9 +35,11 @@ export default function Store() {
     }
   };
 
-  const filtered = products.filter((p) => {
-    const name = p.name?.ar || p.name?.en || '';
-    return name.includes(search);
+  const visibleProducts = products.filter(p => p.is_published !== false);
+
+  const filtered = visibleProducts.filter((p) => {
+    const name = (p.name?.ar || p.name?.en || '').toLowerCase();
+    return !search || name.includes(search.toLowerCase());
   });
 
   return (

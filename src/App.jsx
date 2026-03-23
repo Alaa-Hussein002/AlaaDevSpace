@@ -33,8 +33,6 @@ import AdminProfile from '@/pages/admin/AdminProfile';
 import AdminProjects from '@/pages/admin/AdminProjects';
 import AdminSkills from '@/pages/admin/AdminSkills';
 import AdminExperiences from '@/pages/admin/AdminExperiences';
-import AdminEducations from '@/pages/admin/AdminEducations';
-import AdminCertificates from '@/pages/admin/AdminCertificates';
 import AdminTestimonials from '@/pages/admin/AdminTestimonials';
 import AdminProducts from '@/pages/admin/AdminProducts';
 import AdminOrders from '@/pages/admin/AdminOrders';
@@ -47,6 +45,7 @@ import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminSettings from '@/pages/admin/AdminSettings';
 import AdminArticles from '@/pages/admin/AdminArticles';
 import ArticleEditor from '@/pages/admin/ArticleEditor';
+import AdminAcademic from '@/pages/admin/AdminAcademic';
 
 function App() {
   return (
@@ -83,8 +82,6 @@ function App() {
             <Route path="/admin/projects" element={<AdminProjects />} />
             <Route path="/admin/skills" element={<AdminSkills />} />
             <Route path="/admin/experiences" element={<AdminExperiences />} />
-            <Route path="/admin/educations" element={<AdminEducations />} />
-            <Route path="/admin/certificates" element={<AdminCertificates />} />
             <Route path="/admin/testimonials" element={<AdminTestimonials />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/orders" element={<AdminOrders />} />
@@ -98,6 +95,7 @@ function App() {
             <Route path="/admin/articles" element={<AdminArticles />} />
             <Route path="/admin/articles/new" element={<ArticleEditor />} />
             <Route path="/admin/articles/:id/edit" element={<ArticleEditor />} />
+            <Route path="/admin/academic" element={<AdminAcademic />} />
           </Route>
         </Route>
       </Routes>

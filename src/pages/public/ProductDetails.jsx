@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShoppingBag, ShoppingCart, Eye, Download, ChevronLeft, Star, Tag, Check } from 'lucide-react';
+import { ShoppingBag, ShoppingCart, Eye, Download, ChevronLeft, Star, Tag, Check, Shield, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -120,11 +120,35 @@ export default function ProductDetails() {
 
             {/* الأزرار */}
             <div className="flex gap-3 pt-2">
-              <Button onClick={addToCart} disabled={adding} className="flex-1 h-12 gradient-bg text-white rounded-xl shadow-lg shadow-primary/20 text-base">
+              <Button onClick={addToCart} disabled={adding}
+                className="flex-1 h-12 gradient-bg text-white rounded-xl shadow-lg shadow-primary/20 text-base">
                 <ShoppingCart className="w-5 h-5 ml-2" />
                 {adding ? 'جاري الإضافة...' : 'أضف إلى السلة'}
               </Button>
             </div>
+            
+            {/* تنبيه المنتج الرقمي */}
+            {product.product_type === 'digital' && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-purple-500/5 border border-purple-500/20 text-xs text-purple-600">
+                <Shield className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">منتج رقمي محمي</p>
+                  <p className="text-[10px] text-purple-500/70 mt-0.5">سيُرسل رابط التحميل إلى بريدك الإلكتروني بعد تأكيد الدفع</p>
+                </div>
+              </div>
+            )}
+            
+            {/* معلومات الشحن للمنتج الملموس */}
+            {product.product_type === 'physical' && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-600">
+                <Truck className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">منتج يتطلب شحن</p>
+                  {product.physical_info?.allow_cod && <p className="text-[10px] text-amber-500/70 mt-0.5">💰 متاح الدفع عند الاستلام</p>}
+                  {product.shipping?.shipping_note && <p className="text-[10px] text-amber-500/70 mt-0.5">{product.shipping.shipping_note}</p>}
+                </div>
+              </div>
+            )}
 
             {/* الإحصائيات */}
             <div className="flex gap-6 pt-4 border-t border-border/50 text-sm text-muted-foreground">
