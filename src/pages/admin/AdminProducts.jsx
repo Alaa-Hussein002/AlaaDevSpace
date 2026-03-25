@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus, Pencil, Trash2, ShoppingBag, Loader2, Eye, EyeOff,
@@ -297,12 +297,12 @@ export default function AdminProducts() {
   const [filterType, setFilterType] = useState('all');
   const [autoSlug, setAutoSlug] = useState(true);
 
-  useState(() => { load(); }, []);
-
   const load = async () => {
     try { const { data } = await adminAPI.getProducts(); setProducts(data.data || []); }
     catch (e) { console.error(e); } finally { setLoading(false); }
   };
+
+  useEffect(() => { load(); }, []);
 
   /* === معالج تغيير الاسم مع توليد Slug تلقائي === */
   const handleNameChange = (lang, value) => {
@@ -407,6 +407,15 @@ export default function AdminProducts() {
         is_free: form.pricing.offer_type === 'free',
         compare_at_price: form.pricing.offer_type === 'discount' ? form.pricing.price : 0,
       },
+      digital_asset: form.digital_file, 
+      physical_details: {
+        weight: form.physical_info.weight,
+        dimensions: form.physical_info.dimensions,
+      },
+      stock: {
+        quantity: form.physical_info.stock_quantity, // 🟢 هنا نرسل المخزون لمكانه الصحيح
+        track_inventory: true
+      }
     };
 
     setSaving(true);
@@ -418,28 +427,33 @@ export default function AdminProducts() {
     finally { setSaving(false); }
   };
 
+  // ==========================================
+  // تم تعديل هذه الدالة لتحديث حقل (is_published) فقط في الداتا بيس
+  // ==========================================
+  const handleToggle = async (product) => {
+    try {
+      const newVal = !product.is_published;
+      
+      // التحديث المحلي الفوري لسرعة الاستجابة في الواجهة
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_published: newVal } : p));
+      
+      // إرسال فقط المتغير المراد تعديله لتجنب مسح أو الكتابة فوق باقي بيانات الـ NoSQL
+      await adminAPI.updateProduct(product.id, {
+        is_published: newVal
+      });
+      
+      toast.success(newVal ? 'تم إظهار المنتج في واجهة المتجر' : 'تم إخفاء المنتج من واجهة المتجر');
+    } catch (e) { 
+      // في حال فشل الطلب، نعيد الواجهة كما كانت
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, is_published: product.is_published } : p));
+      toast.error('فشل في تغيير حالة المنتج'); 
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!confirm('حذف هذا المنتج؟')) return;
     try { await adminAPI.deleteProduct(id); toast.success('تم الحذف'); load(); }
     catch (e) { toast.error('فشل'); }
-  };
-
-  const handleToggle = async (product) => {
-    try {
-      const newVal = !product.is_published;
-      await adminAPI.updateProduct(product.id, {
-        name: product.name, slug: product.slug, description: product.description,
-        short_description: product.short_description, product_type: product.product_type,
-        status: product.status, pricing: product.pricing, media: product.media,
-        digital_file: product.digital_file, physical_info: product.physical_info,
-        shipping: product.shipping, attributes: product.attributes,
-        is_featured: product.is_featured, sort_order: product.sort_order,
-        tags: product.tags, category_id: product.category_id,
-        is_published: newVal,
-      });
-      toast.success(newVal ? 'تم إظهار المنتج' : 'تم إخفاء المنتج');
-      load();
-    } catch (e) { toast.error('فشل'); }
   };
 
   const addTag = () => { if (!newTag.trim()) return; if (form.tags.includes(newTag.trim())) return; setForm({ ...form, tags: [...form.tags, newTag.trim()] }); setNewTag(''); };
