@@ -406,6 +406,8 @@ export default function AdminProducts() {
         ...form.pricing,
         is_free: form.pricing.offer_type === 'free',
         compare_at_price: form.pricing.offer_type === 'discount' ? form.pricing.price : 0,
+        offer_start: form.pricing.offer_start ? form.pricing.offer_start : null,
+        offer_end: form.pricing.offer_end ? form.pricing.offer_end : null,
       },
       digital_asset: form.digital_file, 
       physical_details: {

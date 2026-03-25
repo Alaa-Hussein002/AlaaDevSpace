@@ -140,6 +140,12 @@ export const adminAPI = {
   confirmPayment: (paymentNumber, data) => api.post(`/admin/payments/${paymentNumber}/confirm`, data),
   rejectPayment: (paymentNumber, data) => api.post(`/admin/payments/${paymentNumber}/reject`, data),
 
+  // Payment Methods
+  getPaymentMethods: () => api.get('/admin/payment-methods'),
+  createPaymentMethod: (data) => api.post('/admin/payment-methods', data),
+  updatePaymentMethod: (id, data) => api.put(`/admin/payment-methods/${id}`, data),
+  deletePaymentMethod: (id) => api.delete(`/admin/payment-methods/${id}`),
+
   // Invoices
   getInvoices: (params) => api.get('/admin/invoices', { params }),
   getInvoice: (invoiceNumber) => api.get(`/admin/invoices/${invoiceNumber}`),
