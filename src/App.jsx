@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 import SEO from '@/components/SEO'; 
+import { useEffect } from 'react';
 
 // Layouts
 import PublicLayout from '@/components/layout/PublicLayout';
