@@ -54,7 +54,12 @@ import AdminArticles from '@/pages/admin/AdminArticles';
 import ArticleEditor from '@/pages/admin/ArticleEditor';
 import AdminAcademic from '@/pages/admin/AdminAcademic';
 
+
 function App() {
+  useEffect(() => {
+    console.log('API URL:', import.meta.env.VITE_API_URL);
+    console.log('All env:', import.meta.env);
+  }, []);
   return (
     <Router>
       <Routes>
