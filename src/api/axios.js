@@ -1,11 +1,16 @@
+// src/api/axios.js
 import axios from 'axios';
 
+// استخدام متغير البيئة
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: `${API_URL}/api`, // ⬅️ المهم: إضافة VITE_API_URL
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+  withCredentials: true, // ⬅️ مهم للـ Sanctum
 });
 
 // إضافة التوكن تلقائياً
@@ -26,16 +31,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // تجاهل 401 تماماً ولا تفعل شيء
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       
-      // فقط إعادة توجيه إذا لم يكن في Login
       if (!currentPath.includes('/login')) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         
-        // إعادة التوجيه بهدوء
         setTimeout(() => {
           window.location.href = '/login';
         }, 100);
