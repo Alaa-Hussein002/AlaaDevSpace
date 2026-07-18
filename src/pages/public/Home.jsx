@@ -1,19 +1,557 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo, Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useSpring, AnimatePresence, useInView } from 'framer-motion';
 import {
   ArrowDown, Code2, Rocket, ShoppingBag, Gamepad2,
   Download, ChevronLeft, FolderOpen, Zap,
   Terminal, Database, Globe, Cpu, GitBranch, Braces,
-  MonitorSmartphone, GraduationCap, Award, Users, Coffee, FileText ,Calendar, Clock
+  MonitorSmartphone, GraduationCap, Award, Users, Coffee, FileText, Calendar, Clock, Mail, PenTool
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { publicAPI } from '@/api/services';
-import SkillsShowcase from '@/components/portfolio/SkillsShowcase';
-import ExperienceTimeline from '@/components/portfolio/ExperienceTimeline';
-import AcademicJourney from '@/components/portfolio/AcademicJourney';
+import SEO from '@/components/SEO';
+import { useSEO } from '@/hooks/useSEO';
+
+/* ============================================ */
+/*  ⚡ LAZY LOADING COMPONENTS                  */
+/* ============================================ */
+const SkillsShowcase = lazy(() => import('@/components/portfolio/SkillsShowcase'));
+const ExperienceTimeline = lazy(() => import('@/components/portfolio/ExperienceTimeline'));
+const AcademicJourney = lazy(() => import('@/components/portfolio/AcademicJourney'));
+
+/* ============================================ */
+/*  🎭 SKELETON LOADERS - شامل لكل الأقسام     */
+/* ============================================ */
+
+// 1️⃣ Aurora Background Skeleton
+function AuroraBackgroundSkeleton() {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 grid-bg opacity-20 animate-pulse" />
+      <div className="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full opacity-[0.08] blur-[100px] bg-muted/30 animate-pulse" />
+      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full opacity-[0.05] blur-[80px] bg-muted/20 animate-pulse" style={{ animationDelay: '0.5s' }} />
+      
+      {/* خطوط أفقية */}
+      <div className="absolute inset-0">
+        {[...Array(6)].map((_, i) => (
+          <div key={`h-${i}`} className="absolute h-px w-full bg-muted/10 animate-pulse" style={{ top: `${15 + i * 14}%`, animationDelay: `${i * 0.2}s` }} />
+        ))}
+      </div>
+      
+      {/* خطوط عمودية */}
+      <div className="absolute inset-0">
+        {[...Array(5)].map((_, i) => (
+          <div key={`v-${i}`} className="absolute w-px h-full bg-muted/8 animate-pulse" style={{ left: `${20 + i * 15}%`, animationDelay: `${i * 0.3}s` }} />
+        ))}
+      </div>
+      
+      {/* نقاط متحركة */}
+      {[...Array(15)].map((_, i) => (
+        <div key={`p-${i}`} className="absolute w-1 h-1 rounded-full bg-muted/20 animate-pulse" style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 2}s` }} />
+      ))}
+    </div>
+  );
+}
+
+// 2️⃣ Floating Code Block Skeleton
+function FloatingCodeBlockSkeleton() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -50 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.8 }}
+      className="hidden lg:block"
+    >
+      <div className="relative">
+        <div className="w-[380px] rounded-2xl border border-border/50 bg-card/80 backdrop-blur-xl overflow-hidden animate-pulse">
+          {/* Header */}
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-muted/50" />
+              <div className="w-3 h-3 rounded-full bg-muted/50" />
+              <div className="w-3 h-3 rounded-full bg-muted/50" />
+            </div>
+            <div className="h-3 bg-muted/30 rounded w-20 mr-3" />
+          </div>
+          
+          {/* Code Lines */}
+          <div className="p-4 space-y-3">
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-6 h-3 bg-muted/20 rounded" />
+                <div className="h-3 bg-muted/40 rounded" style={{ width: `${60 + Math.random() * 35}%` }} />
+              </div>
+            ))}
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-3 bg-muted/20 rounded" />
+              <div className="w-2 h-4 bg-primary/30 rounded animate-pulse" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl -z-10 animate-pulse" />
+      </div>
+    </motion.div>
+  );
+}
+
+// 3️⃣ Magnetic Button Skeleton
+function MagneticButtonSkeleton({ size = 'lg', className = '' }) {
+  const heights = { sm: 'h-9', default: 'h-10', lg: 'h-11', xl: 'h-12' };
+  const widths = { sm: 'w-28', default: 'w-32', lg: 'w-36', xl: 'w-40' };
+  
+  return (
+    <div className={`${heights[size]} ${widths[size]} rounded-xl bg-muted/50 animate-pulse ${className}`} />
+  );
+}
+
+// 4️⃣ Animated Counter Skeleton
+function AnimatedCounterSkeleton() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      className="text-center animate-pulse"
+    >
+      <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-muted/50" />
+      <div className="h-8 bg-muted/50 rounded w-16 mx-auto mb-2" />
+      <div className="h-3 bg-muted/30 rounded w-20 mx-auto" />
+    </motion.div>
+  );
+}
+
+// 5️⃣ Hero Section Skeleton
+function HeroSkeleton() {
+  return (
+    <section className="relative min-h-screen flex items-center overflow-hidden" dir="rtl">
+      <AuroraBackgroundSkeleton />
+      
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+        {/* Desktop Layout */}
+        <div className="hidden lg:grid lg:grid-cols-3 items-center gap-6">
+          {/* Right Column - Text Content */}
+          <div className="space-y-6">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="h-10 bg-muted/50 rounded-lg w-56 animate-pulse"
+            />
+            
+            {/* Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="space-y-3"
+            >
+              <div className="h-6 bg-muted/50 rounded w-32 animate-pulse" />
+              <div className="h-14 bg-muted/60 rounded-lg w-64 animate-pulse" />
+            </motion.div>
+            
+            {/* Role */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="flex items-center gap-2"
+            >
+              <div className="w-5 h-5 rounded bg-muted/40 animate-pulse" />
+              <div className="h-6 bg-muted/50 rounded w-48 animate-pulse" />
+            </motion.div>
+            
+            {/* Bio */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="space-y-2"
+            >
+              <div className="h-4 bg-muted/40 rounded w-full animate-pulse" />
+              <div className="h-4 bg-muted/40 rounded w-5/6 animate-pulse" />
+              <div className="h-4 bg-muted/40 rounded w-4/6 animate-pulse" />
+            </motion.div>
+            
+            {/* Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="flex gap-3"
+            >
+              <MagneticButtonSkeleton size="lg" />
+              <MagneticButtonSkeleton size="lg" />
+            </motion.div>
+            
+            {/* CV Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.1 }}
+            >
+              <MagneticButtonSkeleton size="sm" className="w-32" />
+            </motion.div>
+            
+            {/* Tech Pills */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.3 }}
+              className="flex items-center gap-3"
+            >
+              <div className="h-3 bg-muted/30 rounded w-16 animate-pulse" />
+              <div className="flex gap-1.5 flex-wrap">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-6 w-16 bg-muted/40 rounded-md animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Center - Avatar */}
+          <div className="flex justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              className="relative"
+            >
+              {/* Blur Background */}
+              <div className="absolute inset-0 rounded-full bg-primary/10 blur-[60px] scale-[2] animate-pulse" />
+              
+              {/* Rotating Circles */}
+              <div className="absolute -inset-10 rounded-full border border-dashed border-muted/20 animate-pulse">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-muted/30" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 rounded-full bg-muted/25" />
+              </div>
+              
+              <div className="absolute -inset-5 rounded-full border border-dashed border-muted/15 animate-pulse" style={{ animationDelay: '0.5s' }}>
+                <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-muted/30" />
+              </div>
+
+              {/* Floating Tech Pills */}
+              {[
+                { className: 'absolute -top-6 -right-8 z-20', delay: '0s' },
+                { className: 'absolute -bottom-5 -left-10 z-20', delay: '0.3s' },
+                { className: 'absolute top-1/3 -left-12 z-20', delay: '0.6s' },
+              ].map((pos, i) => (
+                <div key={i} className={`${pos.className} px-2.5 py-1.5 rounded-lg bg-card/80 border border-border/50 shadow-lg animate-pulse`} style={{ animationDelay: pos.delay }}>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-muted/40" />
+                    <div className="h-3 w-12 bg-muted/40 rounded" />
+                  </div>
+                </div>
+              ))}
+
+              {/* Avatar */}
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                className="relative z-10"
+              >
+                <div className="w-48 h-48 rounded-full bg-muted/50 border-[3px] border-muted/30 shadow-2xl animate-pulse" />
+                
+                {/* Status Indicator */}
+                <div className="absolute bottom-2 right-2 z-20 w-7 h-7 rounded-full bg-muted/40 border-[3px] border-background animate-pulse" />
+              </motion.div>
+            </motion.div>
+          </div>
+
+          {/* Left - Code Block */}
+          <div className="flex justify-end">
+            <FloatingCodeBlockSkeleton />
+          </div>
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden flex flex-col items-center text-center">
+          {/* Avatar */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative mb-8"
+          >
+            <div className="absolute inset-0 rounded-full bg-primary/10 blur-[40px] scale-[2] animate-pulse" />
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              className="relative z-10"
+            >
+              <div className="w-32 h-32 rounded-full bg-muted/50 border-[3px] border-muted/30 shadow-2xl animate-pulse" />
+            </motion.div>
+          </motion.div>
+
+          {/* Badge */}
+          <div className="h-9 bg-muted/50 rounded-lg w-52 mb-5 animate-pulse" />
+
+          {/* Title */}
+          <div className="space-y-3 mb-4 w-full max-w-sm">
+            <div className="h-5 bg-muted/50 rounded w-40 mx-auto animate-pulse" />
+            <div className="h-10 bg-muted/60 rounded-lg w-48 mx-auto animate-pulse" />
+          </div>
+
+          {/* Role */}
+          <div className="flex items-center justify-center gap-2 mb-5">
+            <div className="w-4 h-4 rounded bg-muted/40 animate-pulse" />
+            <div className="h-5 bg-muted/50 rounded w-40 animate-pulse" />
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-2 mb-7 w-full max-w-md">
+            <div className="h-4 bg-muted/40 rounded w-full animate-pulse" />
+            <div className="h-4 bg-muted/40 rounded w-5/6 mx-auto animate-pulse" />
+            <div className="h-4 bg-muted/40 rounded w-4/6 mx-auto animate-pulse" />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-3">
+            <MagneticButtonSkeleton size="default" className="w-28" />
+            <MagneticButtonSkeleton size="default" className="w-28" />
+          </div>
+        </div>
+      </div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-pulse"
+      >
+        <div className="h-3 bg-muted/30 rounded w-16" />
+        <div className="w-4 h-4 rounded bg-muted/30" />
+      </motion.div>
+    </section>
+  );
+}
+
+// 6️⃣ Stats Section Skeleton
+function StatsSkeleton() {
+  return (
+    <section className="py-16 relative" dir="rtl">
+      <div className="max-w-5xl mx-auto px-4">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-8"
+        >
+          <div className="h-8 bg-muted/50 rounded-lg w-56 mx-auto mb-2 animate-pulse" />
+          <div className="h-4 bg-muted/40 rounded w-72 mx-auto animate-pulse" />
+        </motion.div>
+
+        {/* Stats Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-8 p-8 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm"
+        >
+          {[...Array(4)].map((_, i) => (
+            <AnimatedCounterSkeleton key={i} />
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// 7️⃣ Sections Grid Skeleton
+function SectionsGridSkeleton() {
+  return (
+    <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" dir="rtl">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-center mb-16"
+      >
+        <div className="h-7 bg-muted/50 rounded-lg w-24 mx-auto mb-4 animate-pulse" />
+        <div className="h-10 bg-muted/60 rounded-lg w-64 mx-auto mb-4 animate-pulse" />
+        <div className="h-4 bg-muted/40 rounded w-80 mx-auto animate-pulse" />
+      </motion.div>
+
+      {/* Cards Grid */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.15, duration: 0.6 }}
+          >
+            <Card className="relative p-6 border-border/50 bg-card/60 backdrop-blur-sm overflow-hidden h-full">
+              <div className="space-y-4 animate-pulse">
+                {/* Icon */}
+                <div className="w-12 h-12 rounded-xl bg-muted/50" />
+                
+                {/* Title */}
+                <div className="h-6 bg-muted/50 rounded w-32" />
+                
+                {/* Description */}
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted/40 rounded w-full" />
+                  <div className="h-4 bg-muted/40 rounded w-5/6" />
+                </div>
+                
+                {/* Link */}
+                <div className="h-5 bg-muted/40 rounded w-24" />
+              </div>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// 8️⃣ Tech Stack Skeleton
+function TechStackSkeleton() {
+  return (
+    <section className="py-16 relative overflow-hidden" dir="rtl">
+      <div className="absolute inset-0 grid-bg opacity-20 animate-pulse" />
+
+      <div className="relative z-10 max-w-3xl mx-auto px-4">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-10"
+        >
+          <div className="h-8 bg-muted/50 rounded-lg w-56 mx-auto mb-2 animate-pulse" />
+          <div className="h-4 bg-muted/40 rounded w-80 mx-auto animate-pulse" />
+        </motion.div>
+
+        {/* Tech Grid */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          {[...Array(12)].map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.04, type: 'spring', stiffness: 200 }}
+            >
+              <div className="rounded-xl border border-border/30 bg-card/40 p-3.5 flex items-center gap-2.5 animate-pulse">
+                {/* Icon */}
+                <div className="w-8 h-8 rounded-lg bg-muted/50 shrink-0" />
+                
+                {/* Text */}
+                <div className="h-3 bg-muted/40 rounded flex-1" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// 9️⃣ CTA Section Skeleton
+function CTASkeleton() {
+  return (
+    <section className="py-20 px-4" dir="rtl">
+      <div className="max-w-4xl mx-auto text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <div className="relative">
+            <div className="absolute inset-0 rounded-3xl bg-primary/5 blur-3xl animate-pulse" />
+            
+            <Card className="relative p-10 sm:p-14 border-border/50 bg-card/60 backdrop-blur-sm overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5" />
+              
+              <div className="relative z-10 space-y-6 animate-pulse">
+                {/* Emoji */}
+                <div className="w-16 h-16 rounded-full bg-muted/50 mx-auto" />
+                
+                {/* Title */}
+                <div className="space-y-3">
+                  <div className="h-10 bg-muted/50 rounded-lg w-96 mx-auto max-w-full" />
+                </div>
+                
+                {/* Description */}
+                <div className="space-y-2 max-w-lg mx-auto">
+                  <div className="h-4 bg-muted/40 rounded w-full" />
+                  <div className="h-4 bg-muted/40 rounded w-5/6 mx-auto" />
+                </div>
+                
+                {/* Buttons */}
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <MagneticButtonSkeleton size="xl" />
+                  <MagneticButtonSkeleton size="xl" />
+                </div>
+              </div>
+            </Card>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function SectionSkeleton() {
+  return (
+    <section className="py-16 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-10 animate-pulse">
+          <div className="w-14 h-14 rounded-2xl bg-muted/50 mx-auto mb-4" />
+          <div className="h-8 bg-muted/50 rounded-lg w-64 mx-auto mb-2" />
+          <div className="h-4 bg-muted/40 rounded w-96 mx-auto max-w-full" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-48 bg-card/50 rounded-xl border border-border/30 animate-pulse" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================ */
+/*  🎯 LAZY SECTION WRAPPER                     */
+/* ============================================ */
+function LazySection({ children, fallback = <SectionSkeleton /> }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { 
+    once: true, 
+    margin: '200px' // تحميل قبل 200px من الوصول
+  });
+
+  return (
+    <div ref={ref}>
+      {isInView ? (
+        <Suspense fallback={fallback}>
+          {children}
+        </Suspense>
+      ) : (
+        fallback
+      )}
+    </div>
+  );
+}
+
+// 🔟 Full Page Skeleton (يجمع كل الأقسام)
+function FullPageSkeleton() {
+  return (
+    <div>
+      <HeroSkeleton />
+      <StatsSkeleton />
+      <SectionsGridSkeleton />
+      <TechStackSkeleton />
+      <CTASkeleton />
+    </div>
+  );
+}
 
 /* ============================================ */
 /*  Aurora Background                           */
@@ -50,18 +588,19 @@ function AuroraBackground() {
 /* ============================================ */
 /*  Floating Code Block - ديناميكي              */
 /* ============================================ */
-function FloatingCodeBlock({ profile }) {
-  const defaultLines = [
-    { text: 'const developer = {', color: 'text-blue-400' },
-    { text: '  name: "Developer",', color: 'text-emerald-400' },
-    { text: '  role: "Full-Stack",', color: 'text-emerald-400' },
-    { text: '  skills: ["React",', color: 'text-cyan-400' },
-    { text: '    "Laravel"],', color: 'text-cyan-400' },
-    { text: '  passion: "∞",', color: 'text-amber-400' },
-    { text: '};', color: 'text-blue-400' },
-  ];
-
-  const codeLines = profile?.code_block_lines?.length > 0 ? profile.code_block_lines : defaultLines;
+const FloatingCodeBlock = ({ profile }) => {
+  const codeLines = useMemo(() => {
+    if (profile?.code_block_lines?.length > 0) return profile.code_block_lines;
+    return [
+      { text: 'const developer = {', color: 'text-blue-400' },
+      { text: '  name: "Developer",', color: 'text-emerald-400' },
+      { text: '  role: "Full-Stack",', color: 'text-emerald-400' },
+      { text: '  skills: ["React",', color: 'text-cyan-400' },
+      { text: '    "Laravel"],', color: 'text-cyan-400' },
+      { text: '  passion: "∞",', color: 'text-amber-400' },
+      { text: '};', color: 'text-blue-400' },
+    ];
+  }, [profile?.code_block_lines]);
 
   return (
     <motion.div initial={{ opacity: 0, x: -50, rotateY: -15 }} animate={{ opacity: 1, x: 0, rotateY: 0 }} transition={{ duration: 1, delay: 0.8 }} className="hidden lg:block" style={{ perspective: '1000px' }}>
@@ -85,7 +624,7 @@ function FloatingCodeBlock({ profile }) {
       </motion.div>
     </motion.div>
   );
-}
+};
 
 /* ============================================ */
 /*  Magnetic Button                              */
@@ -114,9 +653,9 @@ function MagneticButton({ children, className, ...props }) {
 /* ============================================ */
 /*  Animated Counter                             */
 /* ============================================ */
-function AnimatedCounter({ value, label, iconSrc }) {
+const AnimatedCounter = ({ value, label, iconSrc }) => {
   const [count, setCount] = useState(0);
-  const numericValue = parseInt(value) || 0;
+  const numericValue = useMemo(() => parseInt(value) || 0, [value]);
 
   useEffect(() => {
     if (numericValue === 0) return;
@@ -124,8 +663,12 @@ function AnimatedCounter({ value, label, iconSrc }) {
     const increment = numericValue / (2000 / 16);
     const timer = setInterval(() => {
       start += increment;
-      if (start >= numericValue) { setCount(numericValue); clearInterval(timer); }
-      else setCount(Math.floor(start));
+      if (start >= numericValue) {
+        setCount(numericValue);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
     }, 16);
     return () => clearInterval(timer);
   }, [numericValue]);
@@ -139,39 +682,39 @@ function AnimatedCounter({ value, label, iconSrc }) {
       <div className="text-xs text-muted-foreground mt-1">{label}</div>
     </motion.div>
   );
-}
+};
 
 /* ============================================ */
 /*  Hero Section - ديناميكي بالكامل             */
 /* ============================================ */
-function HeroSection({ profile }) {
+const HeroSection = ({ profile }) => {
   const [currentRole, setCurrentRole] = useState(0);
 
   const name = profile?.full_name?.ar || '';
   const bio = profile?.bio?.ar || '';
   const photo = profile?.photo || '/avatar.jpg';
   const cvFile = profile?.cv_file;
-  const roles = profile?.rotating_roles?.length > 0 ? profile.rotating_roles : [];
-  const techDisplay = profile?.tech_display?.length > 0 ? profile.tech_display : [];
+  const roles = useMemo(() => profile?.rotating_roles || [], [profile?.rotating_roles]);
+  const techDisplay = useMemo(() => profile?.tech_display || [], [profile?.tech_display]);
   const status = profile?.availability_status || 'available';
 
-  const availabilityLabel = { available: 'متاح للعمل الحر والتوظيف', partially_busy: 'منشغل جزئياً — يمكن التواصل', busy: 'منشغل حالياً' };
-  const availabilityColor = { available: 'bg-green-500', partially_busy: 'bg-yellow-500', busy: 'bg-red-500' };
+  const availabilityLabel = useMemo(() => ({
+    available: 'متاح للعمل الحر والتوظيف',
+    partially_busy: 'منشغل جزئياً — يمكن التواصل',
+    busy: 'منشغل حالياً'
+  }), []);
+
+  const availabilityColor = useMemo(() => ({
+    available: 'bg-green-500',
+    partially_busy: 'bg-yellow-500',
+    busy: 'bg-red-500'
+  }), []);
 
   useEffect(() => {
     if (roles.length === 0) return;
     const interval = setInterval(() => setCurrentRole((prev) => (prev + 1) % roles.length), 3000);
     return () => clearInterval(interval);
   }, [roles.length]);
-
-  if (!profile) {
-    return (
-      <section className="relative min-h-screen flex items-center justify-center" dir="rtl">
-        <AuroraBackground />
-        <div className="relative z-10 text-center"><p className="text-muted-foreground">جاري التحميل...</p></div>
-      </section>
-    );
-  }
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden" dir="rtl">
@@ -191,7 +734,7 @@ function HeroSection({ profile }) {
             )}
 
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="text-5xl font-bold leading-tight mb-4">
-              <span className="block text-foreground mb-2">مرحباً، أنا</span>
+              <span className="block text-foreground mb-2"> {profile?.hero_greeting || 'مرحباً، أنا'} </span>
               <span className="block gradient-text">{name}</span>
             </motion.h1>
 
@@ -210,14 +753,66 @@ function HeroSection({ profile }) {
               <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.6 }} className="text-[15px] text-muted-foreground leading-relaxed mb-7">{bio}</motion.p>
             )}
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.6 }} className="flex flex-wrap gap-3">
-              <Link to="/projects"><MagneticButton size="lg" className="gradient-bg text-white rounded-xl px-6 h-11 shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow text-sm"><Rocket className="w-4 h-4 ml-2" /> استعرض أعمالي</MagneticButton></Link>
-              <Link to="/store"><MagneticButton size="lg" variant="outline" className="rounded-xl px-6 h-11 border-border hover:border-primary/50 hover:bg-primary/5 text-sm"><ShoppingBag className="w-4 h-4 ml-2" /> المتجر الرقمي</MagneticButton></Link>
+            {/* الأزرار الرئيسية */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              transition={{ delay: 1, duration: 0.6 }} 
+              className="flex flex-wrap gap-3"
+            >
+              {/* زر أعمالي - بارز */}
+              <Link to="/projects">
+                <MagneticButton 
+                  size="lg" 
+                  className="gradient-bg text-white rounded-xl px-6 h-11 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:shadow-xl hover:scale-105 transition-all duration-300 text-sm font-semibold"
+                >
+                  <Rocket className="w-4 h-4 ml-2" /> 
+                  استعرض أعمالي
+                </MagneticButton>
+              </Link>
             </motion.div>
-
+            
+            {/* زر CV - الأبرز والأكثر جاذبية */}
             {cvFile && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }} className="mt-3">
-                <a href={cvFile} target="_blank" rel="noopener noreferrer"><MagneticButton size="sm" variant="ghost" className="rounded-xl px-5 h-9 hover:bg-primary/5 text-sm text-muted-foreground"><Download className="w-4 h-4 ml-2" /> تحميل CV</MagneticButton></a>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ delay: 1.1 }} 
+                className="mt-4"
+              >
+                <a href={cvFile} target="_blank" rel="noopener noreferrer">
+                  <MagneticButton 
+                    size="lg" 
+                    className="relative overflow-hidden rounded-xl px-6 h-11 text-sm font-bold
+                               bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500
+                               text-white shadow-xl shadow-emerald-500/30
+                               hover:shadow-2xl hover:shadow-emerald-500/50 hover:scale-110
+                               transition-all duration-500
+                               before:absolute before:inset-0 
+                               before:bg-gradient-to-r before:from-emerald-400 before:via-green-400 before:to-teal-400
+                               before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500
+                               border-2 border-emerald-400/30 hover:border-emerald-300/60"
+                  >
+                    <span className="relative z-10 flex items-center">
+                      <Download className="w-5 h-5 ml-2 animate-bounce" /> 
+                      تحميل السيرة الذاتية
+                    </span>
+                    
+                    {/* تأثير التوهج */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      animate={{
+                        x: ['-200%', '200%'],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        repeatDelay: 3,
+                        ease: 'linear',
+                      }}
+                    />
+                  </MagneticButton>
+                </a>
               </motion.div>
             )}
 
@@ -293,7 +888,7 @@ function HeroSection({ profile }) {
           )}
 
           <h1 className="text-4xl font-bold leading-tight mb-4">
-            <span className="block text-foreground mb-1">مرحباً، أنا</span>
+            <span className="block text-foreground mb-1"> {profile?.hero_greeting || 'مرحباً، أنا'} </span>
             <span className="block gradient-text">{name}</span>
           </h1>
 
@@ -308,10 +903,60 @@ function HeroSection({ profile }) {
 
           {bio && <p className="text-sm text-muted-foreground leading-relaxed mb-7 max-w-md">{bio}</p>}
 
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/projects"><Button size="default" className="gradient-bg text-white rounded-xl px-6 shadow-lg shadow-primary/25 text-sm"><Rocket className="w-4 h-4 ml-2" /> أعمالي</Button></Link>
-            <Link to="/store"><Button size="default" variant="outline" className="rounded-xl px-6 text-sm"><ShoppingBag className="w-4 h-4 ml-2" /> المتجر</Button></Link>
+          {/* الأزرار */}
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 w-full max-w-sm">
+            {/* زر أعمالي - بارز */}
+            <Link to="/projects" className="w-full sm:w-auto">
+              <Button 
+                size="default" 
+                className="w-full sm:w-auto gradient-bg text-white rounded-xl px-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:scale-105 transition-all duration-300 text-sm font-semibold"
+              >
+                <Rocket className="w-4 h-4 ml-2" /> 
+                أعمالي
+              </Button>
+            </Link>
           </div>
+          
+          {/* زر CV - الأبرز */}
+          {cvFile && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, type: 'spring' }}
+              className="mt-4 w-full max-w-sm"
+            >
+              <a href={cvFile} target="_blank" rel="noopener noreferrer" className="block">
+                <Button
+                  size="lg"
+                  className="relative overflow-hidden w-full rounded-xl h-12 text-sm font-bold
+                             bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500
+                             text-white shadow-xl shadow-emerald-500/30
+                             hover:shadow-2xl hover:shadow-emerald-500/50 hover:scale-105
+                             transition-all duration-500
+                             border-2 border-emerald-400/30 hover:border-emerald-300/60"
+                >
+                  <span className="relative z-10 flex items-center justify-center">
+                    <Download className="w-5 h-5 ml-2 animate-bounce" />
+                    تحميل السيرة الذاتية
+                  </span>
+                  
+                  {/* تأثير التوهج المتحرك */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{
+                      x: ['-200%', '200%'],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 3,
+                      ease: 'linear',
+                    }}
+                  />
+                </Button>
+              </a>
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -321,14 +966,15 @@ function HeroSection({ profile }) {
       </motion.div>
     </section>
   );
-}
+};
 
 /* ============================================ */
 /*  Stats Section - ديناميكي                    */
 /* ============================================ */
-function StatsSection({ profile }) {
-  const highlights = profile?.highlights;
-  if (!highlights || highlights.length === 0) return null;
+const StatsSection = ({ profile }) => {
+  const highlights = useMemo(() => profile?.highlights || [], [profile?.highlights]);
+  
+  if (highlights.length === 0) return null;
 
   return (
     <section className="py-16 relative" dir="rtl">
@@ -356,40 +1002,113 @@ function StatsSection({ profile }) {
       </div>
     </section>
   );
-}
+};
 
 /* ============================================ */
 /*  Sections Grid                               */
 /* ============================================ */
-function SectionsGrid() {
-  const sections = [
-    { icon: FolderOpen, title: 'المشاريع', desc: 'أنظمة ويب متكاملة، تطبيقات إدارية، ولوحات تحكم ذكية', path: '/projects', gradient: 'from-blue-500/20 to-cyan-500/20', iconBg: 'from-blue-500 to-cyan-500' },
-    { icon: ShoppingBag, title: 'المتجر الرقمي', desc: 'قوالب جاهزة، أكواد مفتوحة المصدر، وأدوات رقمية احترافية', path: '/store', gradient: 'from-purple-500/20 to-pink-500/20', iconBg: 'from-purple-500 to-pink-500' },
-    { icon: Gamepad2, title: 'صالة الألعاب', desc: 'ألعاب فورية ممتعة تختبر ذكاءك وسرعة بديهتك', path: '/games', gradient: 'from-orange-500/20 to-red-500/20', iconBg: 'from-orange-500 to-red-500' },
-  ];
+const SectionsGrid = () => {
+  const sections = useMemo(() => [
+    { 
+      icon: FolderOpen, 
+      title: 'المشاريع', 
+      desc: 'أنظمة ويب متكاملة، تطبيقات إدارية، ولوحات تحكم ذكية', 
+      path: '/projects', 
+      gradient: 'from-blue-500/20 to-cyan-500/20', 
+      iconBg: 'from-blue-500 to-cyan-500',
+      available: true
+    },
+    { 
+      icon: FileText, // أو PenTool
+      title: 'مقالاتي التقنية', 
+      desc: 'مقالات تقنية متخصصة، دروس برمجية، وتجارب عملية في التطوير', 
+      path: '/articles', 
+      gradient: 'from-purple-500/20 to-pink-500/20', 
+      iconBg: 'from-purple-500 to-pink-500',
+      available: true
+    },
+    { 
+      icon: Mail, 
+      title: 'تواصل معي', 
+      desc: 'هل لديك مشروع أو فكرة؟ تواصل معي الآن ودعنا نحولها إلى واقع', 
+      path: '/contact', 
+      gradient: 'from-emerald-500/20 to-teal-500/20', 
+      iconBg: 'from-emerald-500 to-teal-500',
+      available: true
+    },
+  ], []);
+
+  const upcomingSections = useMemo(() => [
+    { 
+      icon: ShoppingBag, 
+      title: 'المتجر الرقمي', 
+      desc: 'قوالب جاهزة، أكواد مفتوحة المصدر، وأدوات رقمية احترافية', 
+      gradient: 'from-orange-500/20 to-amber-500/20', 
+      iconBg: 'from-orange-500 to-amber-500',
+    },
+    { 
+      icon: Gamepad2, 
+      title: 'صالة الألعاب', 
+      desc: 'ألعاب فورية ممتعة تختبر ذكاءك وسرعة بديهتك', 
+      gradient: 'from-rose-500/20 to-red-500/20', 
+      iconBg: 'from-rose-500 to-red-500',
+    },
+  ], []);
 
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto" dir="rtl">
-      <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
-        <Badge variant="secondary" className="mb-4 px-3 py-1"><Zap className="w-3 h-3 ml-1" /> استكشف</Badge>
-        <h2 className="text-3xl sm:text-4xl font-bold mb-4">عالمي <span className="gradient-text">الرقمي</span></h2>
-        <p className="text-muted-foreground max-w-lg mx-auto text-sm">من تطوير الأنظمة المعقدة إلى تصميم الواجهات الجذابة</p>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        whileInView={{ opacity: 1, y: 0 }} 
+        viewport={{ once: true }} 
+        className="text-center mb-16"
+      >
+        <Badge variant="secondary" className="mb-4 px-3 py-1">
+          <Zap className="w-3 h-3 ml-1" /> استكشف
+        </Badge>
+        <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+          عالمي <span className="gradient-text">الرقمي</span>
+        </h2>
+        <p className="text-muted-foreground max-w-lg mx-auto text-sm">
+          من تطوير الأنظمة المعقدة إلى كتابة المقالات التقنية والتواصل المباشر
+        </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      {/* الأقسام المتاحة */}
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
         {sections.map((section, i) => {
           const Icon = section.icon;
           return (
-            <motion.div key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15, duration: 0.6 }}>
+            <motion.div 
+              key={i} 
+              initial={{ opacity: 0, y: 40 }} 
+              whileInView={{ opacity: 1, y: 0 }} 
+              viewport={{ once: true }} 
+              transition={{ delay: i * 0.15, duration: 0.6 }}
+            >
               <Link to={section.path} className="block group">
                 <Card className="relative p-6 border-border/50 bg-card/60 backdrop-blur-sm overflow-hidden card-hover h-full">
                   <div className={`absolute inset-0 bg-gradient-to-br ${section.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                  
                   <div className="relative z-10">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${section.iconBg} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300`}><Icon className="w-6 h-6 text-white" /></div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{section.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-5">{section.desc}</p>
-                    <div className="flex items-center text-sm text-primary font-medium opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">استكشف<ChevronLeft className="w-4 h-4 mr-1" /></div>
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${section.iconBg} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                      {section.title}
+                    </h3>
+                    
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                      {section.desc}
+                    </p>
+                    
+                    <div className="flex items-center text-sm text-primary font-medium opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                      استكشف
+                      <ChevronLeft className="w-4 h-4 mr-1" />
+                    </div>
                   </div>
+                  
                   <div className={`absolute bottom-0 right-0 left-0 h-0.5 bg-gradient-to-l ${section.iconBg} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-right`} />
                 </Card>
               </Link>
@@ -397,29 +1116,105 @@ function SectionsGrid() {
           );
         })}
       </div>
+
+      {/* الأقسام القادمة (Soon) */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.5 }}
+      >
+        <div className="text-center mb-8">
+          <Badge variant="outline" className="mb-2 px-3 py-1 border-muted-foreground/30">
+            <Clock className="w-3 h-3 ml-1" /> قريباً
+          </Badge>
+          <p className="text-xs text-muted-foreground">أقسام جديدة قيد التطوير</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {upcomingSections.map((section, i) => {
+            const Icon = section.icon;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 + i * 0.1 }}
+              >
+                <Card className="relative p-6 border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden h-full opacity-60 cursor-not-allowed">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${section.gradient} opacity-30`} />
+                  
+                  {/* شارة "قريباً" */}
+                  <div className="absolute top-4 left-4 z-20">
+                    <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg">
+                      <Clock className="w-3 h-3 ml-1 animate-pulse" />
+                      قريباً
+                    </Badge>
+                  </div>
+
+                  <div className="relative z-10">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${section.iconBg} opacity-50 flex items-center justify-center mb-5 shadow-lg`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    
+                    <h3 className="text-xl font-bold mb-2 text-muted-foreground">
+                      {section.title}
+                    </h3>
+                    
+                    <p className="text-sm text-muted-foreground/70 leading-relaxed">
+                      {section.desc}
+                    </p>
+
+                    {/* Progress Bar */}
+                    <div className="mt-5">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-muted-foreground">جاري التطوير</span>
+                        <span className="text-xs text-muted-foreground font-mono">
+                          {i === 0 ? '65%' : '45%'}
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: i === 0 ? '65%' : '45%' }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1.5, delay: 0.8 + i * 0.2 }}
+                          className={`h-full bg-gradient-to-r ${section.iconBg} rounded-full`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
     </section>
   );
-}
+};
 
 /* ============================================ */
 /*  Tech Stack - ديناميكي بالكامل               */
 /* ============================================ */
-function TechStack({ profile }) {
-  const tools = profile?.tools;
-  const techDisplay = profile?.tech_display;
-
-  if ((!tools || tools.length === 0) && (!techDisplay || techDisplay.length === 0)) return null;
-
-  const defaultIcons = [Braces, Code2, Database, Zap, Globe, GitBranch, Cpu, MonitorSmartphone];
-  const colors = ['#3b82f6', '#ef4444', '#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#6366f1'];
-
-  const hasTools = tools && tools.length > 0;
-
-  const items = hasTools
-    ? tools.map((tool, i) => ({ name: tool.name, icon: tool.icon, type: 'image', color: colors[i % colors.length] }))
-    : techDisplay.map((name, i) => ({ name, icon: null, type: 'lucide', color: colors[i % colors.length], LucideIcon: defaultIcons[i % defaultIcons.length] }));
-
+const TechStack = ({ profile }) => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  const tools = useMemo(() => profile?.tools || [], [profile?.tools]);
+  const techDisplay = useMemo(() => profile?.tech_display || [], [profile?.tech_display]);
+
+  const defaultIcons = useMemo(() => [Braces, Code2, Database, Zap, Globe, GitBranch, Cpu, MonitorSmartphone], []);
+  const colors = useMemo(() => ['#3b82f6', '#ef4444', '#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#6366f1'], []);
+
+  const items = useMemo(() => {
+    const hasTools = tools.length > 0;
+    return hasTools
+      ? tools.map((tool, i) => ({ name: tool.name, icon: tool.icon, type: 'image', color: colors[i % colors.length] }))
+      : techDisplay.map((name, i) => ({ name, icon: null, type: 'lucide', color: colors[i % colors.length], LucideIcon: defaultIcons[i % defaultIcons.length] }));
+  }, [tools, techDisplay, colors, defaultIcons]);
+
+  if (items.length === 0) return null;
 
   return (
     <section className="py-16 relative overflow-hidden" dir="rtl">
@@ -480,12 +1275,12 @@ function TechStack({ profile }) {
       </div>
     </section>
   );
-}
+};
 
 /* ============================================ */
 /*  CTA Section                                 */
 /* ============================================ */
-function CTASection() {
+const CTASection = () => {
   return (
     <section className="py-20 px-4" dir="rtl">
       <div className="max-w-4xl mx-auto text-center">
@@ -509,34 +1304,91 @@ function CTASection() {
       </div>
     </section>
   );
-}
+};
 
 /* ============================================ */
-/*  Main Home Page                              */
+/*  Main Home Page - مُحسّن بالكامل              */
 /* ============================================ */
 export default function Home() {
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { seoData, loading: seoLoading } = useSEO();
 
   useEffect(() => {
-    const load = async () => {
+    const loadData = async () => {
       try {
-        const { data } = await publicAPI.getProfile();
-        setProfile(data.data);
-      } catch (e) { console.error(e); }
+        setLoading(true);
+        
+        // ⚡ تحميل البيانات الحرجة فقط (Hero + Stats)
+        const profileRes = await publicAPI.getProfile();
+        setProfile(profileRes.data.data);
+
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      } finally {
+        // تأخير بسيط لضمان smooth transition
+        setTimeout(() => setLoading(false), 200);
+      }
     };
-    load();
+
+    loadData();
   }, []);
 
+  // ✅ عرض Skeleton Loaders الشامل أثناء التحميل
+  if (loading) {
+    return (
+      <div>
+        <HeroSkeleton />
+        <StatsSkeleton />
+      </div>
+    );
+  }
+
+  // ✅ عرض المحتوى الفعلي
   return (
-    <div>
-      <HeroSection profile={profile} />
-      <StatsSection profile={profile} />
-      <SectionsGrid />
-      <SkillsShowcase />
-      <ExperienceTimeline />       {/* ← القسم الجديد */}
-      <TechStack profile={profile} />
-      <AcademicJourney />
-      <CTASection />
-    </div>
+    <>
+      {/* ✅ إضافة SEO */}
+      {!seoLoading && seoData && (
+        <SEO
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords}
+          ogImage={seoData.ogImage || seoData.photo}
+          ogType="website"
+        />
+      )}
+      <div>
+        {/* 🔴 CRITICAL - تحميل فوري */}
+        <HeroSection profile={profile} />
+        <StatsSection profile={profile} />
+        
+        {/* 🟡 HIGH PRIORITY - Lazy Load مع Intersection Observer */}
+        <LazySection fallback={<SectionSkeleton />}>
+          <SkillsShowcase />
+        </LazySection>
+  
+        <LazySection fallback={<SectionSkeleton />}>
+          <ExperienceTimeline />
+        </LazySection>
+  
+        <LazySection fallback={<SectionSkeleton />}>
+          <AcademicJourney />
+        </LazySection>
+  
+        {/* 🟢 MEDIUM PRIORITY */}
+        <LazySection fallback={<TechStackSkeleton />}>
+          <TechStack profile={profile} />
+        </LazySection>
+  
+        <LazySection fallback={<SectionsGridSkeleton />}>
+          <SectionsGrid />
+        </LazySection>
+  
+        {/* 🔵 LOW PRIORITY */}
+        <LazySection fallback={<CTASkeleton />}>
+          <CTASection />
+        </LazySection>
+      </div>
+    </>
   );
 }

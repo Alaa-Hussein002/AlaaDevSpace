@@ -11,8 +11,8 @@ const navLinks = [
   { path: '/', label: 'الرئيسية', icon: Code2 },
   { path: '/projects', label: 'المشاريع', icon: FolderOpen },
   { path: '/blog', label: 'المقالات', icon: FileText },
-  { path: '/store', label: 'المتجر', icon: ShoppingBag },
-  { path: '/games', label: 'الألعاب', icon: Gamepad2 },
+  // { path: '/store', label: 'المتجر', icon: ShoppingBag },
+  // { path: '/games', label: 'الألعاب', icon: Gamepad2 },
   { path: '/contact', label: 'تواصل', icon: Mail },
 ];
 
@@ -65,7 +65,7 @@ export default function Navbar() {
               <Code2 className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-lg gradient-text hidden sm:block">
-              Alaa Systems
+              Alaa Hussein
             </span>
           </Link>
 
@@ -99,7 +99,8 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            {isAuthenticated && (
+            {/* سلة التسوق والمفظلة */}
+            {/* {isAuthenticated && (
               <>
                 <Link to="/favorites">
                   <Button variant="ghost" size="icon" className="rounded-lg relative">
@@ -118,7 +119,7 @@ export default function Navbar() {
                   </Button>
                 </Link>
               </>
-            )}
+            )} */}
             <Button
               variant="ghost"
               size="icon"
@@ -138,7 +139,7 @@ export default function Navbar() {
               </AnimatePresence>
             </Button>
 
-            {isAuthenticated && user?.type === 'admin' ? (
+            {/* {isAuthenticated && user?.type === 'admin' ? (
               <Link to="/admin">
                 <Button size="sm" className="gradient-bg text-white rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                   لوحة التحكم
@@ -150,7 +151,7 @@ export default function Navbar() {
                   دخول
                 </Button>
               </Link>
-            )}
+            )} */}
 
             {/* Mobile Toggle */}
             <Button

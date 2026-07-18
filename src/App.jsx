@@ -1,25 +1,32 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
+import SEO from '@/components/SEO'; 
 
 // Layouts
 import PublicLayout from '@/components/layout/PublicLayout';
 import AdminLayout from '@/components/layout/AdminLayout';
 import AuthGuard from '@/components/layout/AuthGuard';
+import AdminGuard from "./components/layout/AdminGuard";
+import CustomerGuard from './components/layout/CustomerGuard';
 
 // Public Pages
 import Home from '@/pages/public/Home';
 import Projects from '@/pages/public/Projects';
 import ProjectDetails from '@/pages/public/ProjectDetails';
+import Articles from '@/pages/public/Articles';
+import ArticleDetails from '@/pages/public/ArticleDetails';
+import Contact from '@/pages/public/Contact';
+
 import Store from '@/pages/public/Store';
 import ProductDetails from '@/pages/public/ProductDetails';
 import Games from '@/pages/public/Games';
-import Contact from '@/pages/public/Contact';
-import Articles from '@/pages/public/Articles';
-import ArticleDetails from '@/pages/public/ArticleDetails';
 
 // Auth Pages
-import Login from '@/pages/auth/Login';
-import Register from '@/pages/auth/Register';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import VerifyOtp from './pages/auth/VerifyOtp';
+import ResetPassword from './pages/auth/ResetPassword';
 
 // Customer Pages
 import CustomerCart from '@/pages/customer/CustomerCart';
@@ -49,30 +56,43 @@ import AdminAcademic from '@/pages/admin/AdminAcademic';
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:slug" element={<ProjectDetails />} />
-          <Route path="/store" element={<Store />} />
+          {/* <Route path="/store" element={<Store />} /> */}
           <Route path="/store/:slug" element={<ProductDetails />} />
-          <Route path="/games" element={<Games />} />
+          {/* <Route path="/games" element={<Games />} /> */}
           <Route path="/contact" element={<Contact />} />
           <Route path="/blog" element={<Articles />} />
           <Route path="/blog/:slug" element={<ArticleDetails />} />
 
           {/* Customer Routes */}
-          <Route path="/cart" element={<CustomerCart />} />
+          {/* <Route path="/cart" element={<CustomerCart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/my-orders" element={<MyOrders />} />
-          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/favorites" element={<Favorites />} /> */}
         </Route>
 
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
+        
+        <Route element={<CustomerGuard />}>
+          <Route element={<PublicLayout />}>
+            <Route path="/cart" element={<CustomerCart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/favorites" element={<Favorites />} />
+          </Route>
+        </Route>
 
         {/* Admin Routes */}
         <Route element={<AuthGuard />}>
@@ -99,8 +119,21 @@ function App() {
           </Route>
         </Route>
       </Routes>
-      <Toaster position="top-center" richColors />
-    </BrowserRouter>
+      <Toaster 
+        position="top-center" 
+        richColors 
+        expand={true}
+        duration={4000}
+        closeButton
+        toastOptions={{
+          style: {
+            padding: '16px',
+            fontSize: '14px',
+          },
+          className: 'font-cairo',
+        }}
+      />
+    </Router>
   );
 }
 

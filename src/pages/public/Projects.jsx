@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { publicAPI } from '@/api/services';
 import FavoriteButton from '@/components/ui/favorite-button';
+import SEO from '@/components/SEO';
+import { useSEO } from '@/hooks/useSEO';
 
 /* ============================================ */
 /*  خلفية متحركة للمشاريع                      */
@@ -165,35 +167,40 @@ function ProjectCard({ project, index }) {
                 onClick={(e) => e.preventDefault()}
               >
                 {project.links?.github && (
-                  <a
-                    href={project.links.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(project.links.github, "_blank", "noopener,noreferrer");
+                    }}
                     className="w-9 h-9 rounded-lg bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-white/20 transition-colors"
                     title="كود المصدر"
                   >
                     <Github className="w-4 h-4 text-white" />
-                  </a>
+                  </button>
                 )}
+              
                 {project.links?.live_demo && (
-                  <a
-                    href={project.links.live_demo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(project.links.live_demo, "_blank", "noopener,noreferrer");
+                    }}
                     className="w-9 h-9 rounded-lg bg-primary/60 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-primary/80 transition-colors"
                     title="عرض حي"
                   >
                     <ExternalLink className="w-4 h-4 text-white" />
-                  </a>
+                  </button>
                 )}
               </motion.div>
 
               {/* زر المفضلة */}
-              <div className="absolute bottom-3 right-3">
+              {/* <div className="absolute bottom-3 right-3">
                 <FavoriteButton item={project} type="project" />
-              </div>
+              </div> */}
             </div>
 
             {/* المحتوى */}
@@ -252,29 +259,35 @@ function ProjectCard({ project, index }) {
                 {/* روابط مباشرة */}
                 <div className="flex items-center gap-1.5" onClick={(e) => e.preventDefault()}>
                   {project.links?.github && (
-                    <a
-                      href={project.links.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(project.links.github, "_blank", "noopener,noreferrer");
+                      }}
                       className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                       title="GitHub"
                     >
                       <Github className="w-3.5 h-3.5" />
-                    </a>
+                    </button>
                   )}
+                
                   {project.links?.live_demo && (
-                    <a
-                      href={project.links.live_demo}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(project.links.live_demo, "_blank", "noopener,noreferrer");
+                      }}
                       className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-all"
                       title="عرض حي"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+                    </button>
                   )}
+                
                   <motion.div
                     animate={{ x: hovered ? -4 : 0 }}
                     className="text-primary mr-1"
@@ -308,6 +321,7 @@ export default function Projects() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [searchFocused, setSearchFocused] = useState(false);
+  const { seoData, loading: seoLoading } = useSEO();
 
   useEffect(() => { loadProjects(); }, []);
 
@@ -343,6 +357,17 @@ export default function Projects() {
   ];
 
   return (
+    <>
+      {/* ✅ إضافة SEO */}
+      {!seoLoading && seoData && (
+        <SEO
+          title={`المشاريع - ${seoData.title}`}
+          description="استعرض مجموعة من المشاريع التي قمت بتطويرها باستخدام أحدث التقنيات والممارسات الهندسية"
+          keywords={`مشاريع, ${seoData.keywords}, portfolio, projects`}
+          ogImage={seoData.photo}
+          ogType="website"
+        />
+      )}
     <div className="min-h-screen relative" dir="rtl">
       {/* الخلفية */}
       <ProjectsBackground />
@@ -537,5 +562,6 @@ export default function Projects() {
         </div>
       </div>
     </div>
+    </>
   );
 }

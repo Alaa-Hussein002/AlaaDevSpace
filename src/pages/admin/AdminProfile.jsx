@@ -15,6 +15,21 @@ import { toast } from 'sonner';
 import { adminAPI } from '@/api/services';
 import ImageUpload from '@/components/ui/image-upload';
 
+const ensureArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return Object.values(value);
+  }
+  return [];
+};
+
+const ensureObject = (value) => {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value;
+  }
+  return {};
+};
+
 function SectionHeader({ icon: Icon, title, subtitle }) {
   return (
     <div className="flex items-start gap-3 mb-5">
@@ -46,9 +61,33 @@ export default function AdminProfile() {
   const load = async () => {
     try {
       const { data } = await adminAPI.getProfile();
-      setProfile(data.data || {});
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+      const raw = data.data || {};
+      
+      setProfile({
+        ...raw,
+        // الكائنات
+        full_name: ensureObject(raw.full_name),
+        // title: ensureObject(raw.title),
+        bio: ensureObject(raw.bio),
+        // location: ensureObject(raw.location),
+        contact: ensureObject(raw.contact),
+        seo: ensureObject(raw.seo),
+        // المصفوفات
+        rotating_roles: ensureArray(raw.rotating_roles),
+        tech_display: ensureArray(raw.tech_display),
+        tools: ensureArray(raw.tools),
+        highlights: ensureArray(raw.highlights),
+        social_links: ensureArray(raw.social_links),
+        code_block_lines: ensureArray(raw.code_block_lines),
+        hero_greeting: raw.hero_greeting || '',
+      });
+      
+    } catch (e) {
+      console.error('خطأ في تحميل الملف الشخصي:', e);
+      toast.error('فشل تحميل البيانات');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -167,53 +206,241 @@ export default function AdminProfile() {
       </motion.div>
 
       {/* ═══ 2. المعلومات الأساسية ═══ */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-        <Card className="p-5 sm:p-6 border-border/50 space-y-5">
-          <SectionHeader icon={User} title="المعلومات الأساسية" subtitle="الاسم والنبذة وحالة التوفر" />
+     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+       <Card className="p-5 sm:p-6 border-border/50 space-y-5">
+         <SectionHeader icon={User} title="المعلومات الأساسية" subtitle="الاسم والنبذة وحالة التوفر" />
+     
+         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+           <div className="space-y-2">
+             <Label>الاسم (عربي)</Label>
+             <Input 
+               value={profile.full_name?.ar || ''} 
+               onChange={(e) => setProfile({ ...profile, full_name: { ...profile.full_name, ar: e.target.value } })} 
+               className="h-11 bg-background" 
+               placeholder="علاء حسين" 
+             />
+           </div>
+           <div className="space-y-2">
+             <Label>الاسم (إنجليزي)</Label>
+             <Input 
+               value={profile.full_name?.en || ''} 
+               onChange={(e) => setProfile({ ...profile, full_name: { ...profile.full_name, en: e.target.value } })} 
+               className="h-11 bg-background" 
+               dir="ltr" 
+               placeholder="Alaa Hussein" 
+             />
+           </div>
+         </div>
+     
+         {/* ✅ كلمة الترحيب */}
+         <div className="space-y-2">
+           <Label className="flex items-center gap-2">
+             <span>كلمة ترحيبية</span>
+             <Badge variant="secondary" className="text-[9px]">اختياري</Badge>
+           </Label>
+           <Input 
+             value={profile.hero_greeting || ''} 
+             onChange={(e) => setProfile({ ...profile, hero_greeting: e.target.value })} 
+             className="h-11 bg-background" 
+             placeholder="مرحباً، أنا..." 
+           />
+           <p className="text-[10px] text-muted-foreground">
+             تظهر في الصفحة الرئيسية قبل اسمك (مثال: "مرحباً، أنا علاء")
+           </p>
+         </div>
+     
+         <div className="space-y-2">
+           <Label>نبذة عني (عربي)</Label>
+           <Textarea 
+             value={profile.bio?.ar || ''} 
+             onChange={(e) => setProfile({ ...profile, bio: { ...profile.bio, ar: e.target.value } })} 
+             className="min-h-[100px] bg-background resize-none text-sm leading-relaxed" 
+             placeholder="اكتب نبذة مختصرة عنك..." 
+           />
+         </div>
+     
+         <div className="space-y-2">
+           <Label>نبذة عني (إنجليزي)</Label>
+           <Textarea 
+             value={profile.bio?.en || ''} 
+             onChange={(e) => setProfile({ ...profile, bio: { ...profile.bio, en: e.target.value } })} 
+             className="min-h-[80px] bg-background resize-none text-sm" 
+             dir="ltr" 
+             placeholder="About me..." 
+           />
+         </div>
+     
+         <div className="space-y-3">
+           <Label>حالة التوفر</Label>
+           <div className="flex flex-wrap gap-2">
+             {availabilityOptions.map((opt) => {
+               const isActive = (profile.availability_status || 'available') === opt.value;
+               return (
+                 <button
+                   key={opt.value}
+                   onClick={() => setProfile({ ...profile, availability_status: opt.value })}
+                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all text-sm ${isActive ? `border-primary bg-primary/5 font-medium ring-4 ${opt.ring}` : 'border-border hover:border-primary/30'}`}
+                 >
+                   <span className={`w-2.5 h-2.5 rounded-full ${opt.color} ${isActive ? 'animate-pulse' : ''}`} />
+                   {opt.label}
+                 </button>
+               );
+             })}
+           </div>
+         </div>
+       </Card>
+     </motion.div>
+     
+     {/* ✅ 3. تحسين محركات البحث (SEO) ═══ */}
+     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+       <Card className="p-5 sm:p-6 border-border/50 space-y-5">
+         <SectionHeader 
+           icon={BarChart3} 
+           title="تحسين محركات البحث (SEO)" 
+           subtitle="ساعد محركات البحث على فهم موقعك بشكل أفضل" 
+         />
+     
+         <div className="space-y-2">
+           <Label className="flex items-center gap-2">
+             <span>عنوان الصفحة (Title)</span>
+             <Badge variant="secondary" className="text-[9px]">50-60 حرف</Badge>
+           </Label>
+           <Input 
+             value={profile.seo?.title || ''} 
+             onChange={(e) => setProfile({ 
+               ...profile, 
+               seo: { ...profile.seo, title: e.target.value } 
+             })} 
+             className="h-11 bg-background" 
+             placeholder="علاء حسين - مطور Full-Stack | Laravel & React" 
+             maxLength={60}
+           />
+           <p className="text-[10px] text-muted-foreground">
+             يظهر في نتائج البحث وعنوان التبويب
+           </p>
+         </div>
+     
+         <div className="space-y-2">
+           <Label className="flex items-center gap-2">
+             <span>الوصف (Description)</span>
+             <Badge variant="secondary" className="text-[9px]">150-160 حرف</Badge>
+           </Label>
+           <Textarea 
+             value={profile.seo?.description || ''} 
+             onChange={(e) => setProfile({ 
+               ...profile, 
+               seo: { ...profile.seo, description: e.target.value } 
+             })} 
+             className="min-h-[80px] bg-background resize-none text-sm leading-relaxed" 
+             placeholder="مطور Full-Stack متخصص في بناء تطبيقات ويب عصرية باستخدام Laravel و React. خبرة في تصميم الأنظمة وتطوير واجهات المستخدم..."
+             maxLength={160}
+           />
+           <p className="text-[10px] text-muted-foreground flex items-center justify-between">
+             <span>يظهر في نتائج البحث أسفل العنوان</span>
+             <span className={`font-mono ${(profile.seo?.description || '').length > 160 ? 'text-red-500' : ''}`}>
+               {(profile.seo?.description || '').length}/160
+             </span>
+           </p>
+         </div>
+     
+         <div className="space-y-2">
+           <Label className="flex items-center gap-2">
+             <span>الكلمات المفتاحية (Keywords)</span>
+             <Badge variant="secondary" className="text-[9px]">اختياري</Badge>
+           </Label>
+           <Input 
+             value={profile.seo?.keywords || ''} 
+             onChange={(e) => setProfile({ 
+               ...profile, 
+               seo: { ...profile.seo, keywords: e.target.value } 
+             })} 
+             className="h-11 bg-background" 
+             dir="ltr"
+             placeholder="Full Stack Developer, Laravel, React, Web Development, API"
+           />
+           <p className="text-[10px] text-muted-foreground">
+             افصل الكلمات بفواصل (,) - تستخدمها بعض محركات البحث
+           </p>
+         </div>
+     
+         <div className="space-y-2">
+           <Label className="flex items-center gap-2">
+             <span>صورة Open Graph</span>
+             <Badge variant="secondary" className="text-[9px]">للمشاركة على السوشيال ميديا</Badge>
+           </Label>
+           <div className="max-w-[300px]">
+             <ImageUpload 
+               value={profile.seo?.og_image} 
+               onChange={(url) => setProfile({ 
+                 ...profile, 
+                 seo: { ...profile.seo, og_image: url } 
+               })} 
+               folder="seo" 
+               label="" 
+             />
+           </div>
+           <p className="text-[10px] text-muted-foreground">
+             الحجم المثالي: 1200x630 بكسل (تظهر عند مشاركة الموقع على Facebook, Twitter, LinkedIn)
+           </p>
+         </div>
+     
+         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+           <div className="space-y-2">
+             <Label>نوع الموقع (Type)</Label>
+             <select
+               value={profile.seo?.type || 'website'}
+               onChange={(e) => setProfile({ 
+                 ...profile, 
+                 seo: { ...profile.seo, type: e.target.value } 
+               })}
+               className="w-full h-11 rounded-lg border border-border bg-background px-3 text-sm"
+             >
+               <option value="website">موقع ويب</option>
+               <option value="profile">ملف شخصي</option>
+               <option value="portfolio">معرض أعمال</option>
+             </select>
+           </div>
+     
+           <div className="space-y-2">
+             <Label>اللغة (Locale)</Label>
+             <select
+               value={profile.seo?.locale || 'ar_SA'}
+               onChange={(e) => setProfile({ 
+                 ...profile, 
+                 seo: { ...profile.seo, locale: e.target.value } 
+               })}
+               className="w-full h-11 rounded-lg border border-border bg-background px-3 text-sm"
+             >
+               <option value="ar_SA">العربية (السعودية)</option>
+               <option value="ar_EG">العربية (مصر)</option>
+               <option value="ar_YE">العربية (اليمن)</option>
+               <option value="en_US">English (US)</option>
+             </select>
+           </div>
+         </div>
+     
+         {/* معاينة في نتائج البحث */}
+         <div className="mt-6 p-4 rounded-xl bg-muted/30 border border-border/30">
+           <p className="text-[10px] font-medium text-muted-foreground mb-3 flex items-center gap-2">
+             <BarChart3 className="w-3 h-3" />
+             معاينة في نتائج البحث
+           </p>
+           <div className="space-y-1">
+             <p className="text-blue-600 text-sm font-medium line-clamp-1">
+               {profile.seo?.title || profile.full_name?.ar || 'عنوان الموقع'}
+             </p>
+             <p className="text-[10px] text-green-700" dir="ltr">
+               {typeof window !== 'undefined' ? window.location.origin : 'https://yoursite.com'}
+             </p>
+             <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+               {profile.seo?.description || profile.bio?.ar || 'وصف الموقع يظهر هنا...'}
+             </p>
+           </div>
+         </div>
+       </Card>
+     </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>الاسم (عربي)</Label>
-              <Input value={profile.full_name?.ar || ''} onChange={(e) => setProfile({ ...profile, full_name: { ...profile.full_name, ar: e.target.value } })} className="h-11 bg-background" placeholder="علاء حسين" />
-            </div>
-            <div className="space-y-2">
-              <Label>الاسم (إنجليزي)</Label>
-              <Input value={profile.full_name?.en || ''} onChange={(e) => setProfile({ ...profile, full_name: { ...profile.full_name, en: e.target.value } })} className="h-11 bg-background" dir="ltr" placeholder="Alaa Hussein" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>نبذة عني (عربي)</Label>
-            <Textarea value={profile.bio?.ar || ''} onChange={(e) => setProfile({ ...profile, bio: { ...profile.bio, ar: e.target.value } })} className="min-h-[100px] bg-background resize-none text-sm leading-relaxed" placeholder="اكتب نبذة مختصرة عنك..." />
-          </div>
-
-          <div className="space-y-2">
-            <Label>نبذة عني (إنجليزي)</Label>
-            <Textarea value={profile.bio?.en || ''} onChange={(e) => setProfile({ ...profile, bio: { ...profile.bio, en: e.target.value } })} className="min-h-[80px] bg-background resize-none text-sm" dir="ltr" placeholder="About me..." />
-          </div>
-
-          <div className="space-y-3">
-            <Label>حالة التوفر</Label>
-            <div className="flex flex-wrap gap-2">
-              {availabilityOptions.map((opt) => {
-                const isActive = (profile.availability_status || 'available') === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => setProfile({ ...profile, availability_status: opt.value })}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all text-sm ${isActive ? `border-primary bg-primary/5 font-medium ring-4 ${opt.ring}` : 'border-border hover:border-primary/30'}`}
-                  >
-                    <span className={`w-2.5 h-2.5 rounded-full ${opt.color} ${isActive ? 'animate-pulse' : ''}`} />
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* ═══ 3. الأدوار المتناوبة ═══ */}
+      {/* ═══ 4. الأدوار المتناوبة ═══ */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card className="p-5 sm:p-6 border-border/50 space-y-4">
           <SectionHeader icon={Briefcase} title="الأدوار المتناوبة" subtitle="تظهر بالتناوب تحت اسمك في الصفحة الرئيسية — الترتيب مهم" />
@@ -239,7 +466,7 @@ export default function AdminProfile() {
         </Card>
       </motion.div>
 
-      {/* ═══ 4. شارات التقنيات (الصفحة الرئيسية) ═══ */}
+      {/* ═══ 5. شارات التقنيات (الصفحة الرئيسية) ═══ */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <Card className="p-5 sm:p-6 border-border/50 space-y-4">
           <SectionHeader icon={Cpu} title="شارات التقنيات" subtitle="الشارات الصغيرة التي تظهر أسفل الأزرار وحول صورتك" />
@@ -371,7 +598,7 @@ export default function AdminProfile() {
         </Card>
       </motion.div>
 
-      {/* ═══ 5. التقنيات والأدوات (مع أيقونات) ═══ */}
+      {/* ═══ 6. التقنيات والأدوات (مع أيقونات) ═══ */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Card className="p-5 sm:p-6 border-border/50 space-y-4">
           <SectionHeader icon={Wrench} title="التقنيات والأدوات" subtitle="القسم الكامل بالأيقونات — يظهر كشبكة في الصفحة الرئيسية" />
@@ -413,7 +640,7 @@ export default function AdminProfile() {
         </Card>
       </motion.div>
 
-      {/* ═══ 6. الأرقام والإنجازات ═══ */}
+      {/* ═══ 7. الأرقام والإنجازات ═══ */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
         <Card className="p-5 sm:p-6 border-border/50 space-y-4">
           <SectionHeader icon={BarChart3} title="الأرقام والإنجازات" subtitle="تظهر كعدادات في الصفحة الرئيسية" />
@@ -454,7 +681,7 @@ export default function AdminProfile() {
         </Card>
       </motion.div>
 
-      {/* ═══ 7. معلومات التواصل ═══ */}
+      {/* ═══ 8. معلومات التواصل ═══ */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
         <Card className="p-5 sm:p-6 border-border/50 space-y-4">
           <SectionHeader icon={Phone} title="معلومات التواصل" />
@@ -466,7 +693,7 @@ export default function AdminProfile() {
         </Card>
       </motion.div>
 
-      {/* ═══ 8. وسائل التواصل الاجتماعي ═══ */}
+      {/* ═══ 9. وسائل التواصل الاجتماعي ═══ */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
         <Card className="p-5 sm:p-6 border-border/50 space-y-4">
           <div className="flex items-start justify-between">
@@ -503,7 +730,7 @@ export default function AdminProfile() {
         </Card>
       </motion.div>
 
-      {/* ═══ 9. السيرة الذاتية ═══ */}
+      {/* ═══ 10. السيرة الذاتية ═══ */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <Card className="p-5 sm:p-6 border-border/50 space-y-4">
           <SectionHeader icon={FileDown} title="السيرة الذاتية (CV)" subtitle="ارفع ملف CV من جهازك أو ضع رابط من التخزين السحابي" />

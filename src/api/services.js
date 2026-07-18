@@ -4,19 +4,29 @@ import api from './axios';
 // 🔐 Auth
 // ==========================================
 export const authAPI = {
+  // ===== Basic Auth =====
   login: (data) => api.post('/auth/login', data),
   register: (data) => api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
+  logoutAll: () => api.post('/auth/logout-all'),
   me: () => api.get('/auth/me'),
+  checkAuth: () => api.get('/auth/check'),
   updateProfile: (data) => api.put('/auth/profile', data),
   changePassword: (data) => api.put('/auth/change-password', data),
+
+  // ===== Password Reset =====
+  forgotPassword: (data) => api.post('/auth/password/forgot', data),
+  verifyOtp: (data) => api.post('/auth/password/verify-otp', data),
+  resetPassword: (data) => api.post('/auth/password/reset', data),
+  resendOtp: (data) => api.post('/auth/password/resend-otp', data),
 };
 
 // ==========================================
 // 🌐 Public
 // ==========================================
 export const publicAPI = {
-  getProfile: () => api.get('/public/profile'),
+  // Profile & Portfolio
+  getProfile: () => api.get('/public/profile'),           // ← Changed from /guest
   getProjects: (params) => api.get('/public/projects', { params }),
   getProject: (slug) => api.get(`/public/projects/${slug}`),
   getSkills: () => api.get('/public/skills'),
@@ -26,23 +36,29 @@ export const publicAPI = {
   getTestimonials: () => api.get('/public/testimonials'),
   sendContact: (data) => api.post('/public/contact', data),
 
-  // Store
+  // Articles
+  getArticles: (params) => api.get('/public/articles', { params }),
+  getArticle: (slug) => api.get(`/public/articles/${slug}`), // ✅ slug وليس id
+  getArticleCategories: () => api.get('/public/articles/categories'),
+  getFeaturedArticles: () => api.get('/public/articles/featured'),
+  getRelatedArticles: (slug) => api.get(`/public/articles/${slug}/related`),
+
+  // Store (will be disabled for MVP)
   getCategories: () => api.get('/public/store/categories'),
   getProducts: (params) => api.get('/public/store/products', { params }),
   getProduct: (slug) => api.get(`/public/store/products/${slug}`),
   getPaymentMethods: () => api.get('/public/store/payment-methods'),
 
-  // Games
+  // Games (will be disabled for MVP)
   getGames: () => api.get('/public/games'),
   getGame: (slug) => api.get(`/public/games/${slug}`),
   playGame: (slug) => api.post(`/public/games/${slug}/play`),
   submitScore: (slug, data) => api.post(`/public/games/${slug}/score`, data),
   getLeaderboard: (slug) => api.get(`/public/games/${slug}/leaderboard`),
 
-  // Articles
-  getArticles: (params) => api.get('/public/articles', { params }),
-  getArticle: (slug) => api.get(`/public/articles/${slug}`),
-  getArticleCategories: () => api.get('/public/articles/categories'),
+  // Projects & Articles (for SEO)
+  getProjectBySlug: (slug) => api.get(`/api/projects/${slug}`),
+  getArticleBySlug: (slug) => api.get(`/api/articles/${slug}`),
 
   // Health
   health: () => api.get('/health'),

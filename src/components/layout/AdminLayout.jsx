@@ -40,7 +40,11 @@ export default function AdminLayout() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    toast.success('تم تسجيل الخروج بنجاح');
+    navigate('/login', { 
+      replace: true,
+      state: { fromLogout: true } // ✅ إضافة هذا
+    });
   };
 
   const SidebarContent = () => (

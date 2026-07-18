@@ -16,6 +16,7 @@ The React Compiler is not enabled on this template because of its impact on dev 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
 
+
 ```
 AlaaDevSpace
 ├─ components.json
@@ -45,8 +46,10 @@ AlaaDevSpace
 │  │  ├─ admin
 │  │  ├─ games
 │  │  ├─ layout
+│  │  │  ├─ AdminGuard.jsx
 │  │  │  ├─ AdminLayout.jsx
 │  │  │  ├─ AuthGuard.jsx
+│  │  │  ├─ CustomerGuard.jsx
 │  │  │  ├─ Footer.jsx
 │  │  │  ├─ Navbar.jsx
 │  │  │  └─ PublicLayout.jsx
@@ -54,6 +57,8 @@ AlaaDevSpace
 │  │  │  ├─ AcademicJourney.jsx
 │  │  │  ├─ ExperienceTimeline.jsx
 │  │  │  └─ SkillsShowcase.jsx
+│  │  ├─ SEO.jsx
+│  │  ├─ SkeletonLoader.jsx
 │  │  ├─ store
 │  │  └─ ui
 │  │     ├─ avatar.jsx
@@ -71,12 +76,14 @@ AlaaDevSpace
 │  │     ├─ select.jsx
 │  │     ├─ separator.jsx
 │  │     ├─ sheet.jsx
+│  │     ├─ SmartIcon.jsx
 │  │     ├─ sonner.jsx
 │  │     ├─ switch.jsx
 │  │     ├─ table.jsx
 │  │     ├─ tabs.jsx
 │  │     └─ textarea.jsx
 │  ├─ hooks
+│  │  └─ useSEO.js
 │  ├─ index.css
 │  ├─ lib
 │  │  └─ utils.js
@@ -102,8 +109,11 @@ AlaaDevSpace
 │  │  │  ├─ ArticleEditor.jsx
 │  │  │  └─ Dashboard.jsx
 │  │  ├─ auth
+│  │  │  ├─ ForgotPassword.jsx
 │  │  │  ├─ Login.jsx
-│  │  │  └─ Register.jsx
+│  │  │  ├─ Register.jsx
+│  │  │  ├─ ResetPassword.jsx
+│  │  │  └─ VerifyOtp.jsx
 │  │  ├─ customer
 │  │  │  ├─ Checkout.jsx
 │  │  │  ├─ CustomerCart.jsx

@@ -250,16 +250,57 @@ export default function ArticleEditor() {
   };
 
   const handleSave = async (asDraft = false) => {
-    if (!form.title) return toast.error('العنوان مطلوب');
-    const saveData = { ...form };
-    if (asDraft) { saveData.status = 'draft'; saveData.is_published = false; }
+    if (!form.title) {
+      return toast.error('العنوان مطلوب');
+    }
+  
+    // ✅ تحضير البيانات للإرسال
+    const saveData = {
+      title: form.title,
+      slug: form.slug || '',
+      excerpt: form.excerpt || '',
+      blocks: form.blocks || [],
+      cover_image: form.cover_image || null,
+      category: form.category || '',
+      tags: form.tags || [],
+      sources: form.sources || [],
+      language: form.language || 'ar',
+      status: asDraft ? 'draft' : (form.status || 'published'),
+      is_featured: form.is_featured || false,
+      is_published: asDraft ? false : (form.status === 'published'),
+      author: form.author || { name: 'علاء حسين' },
+    };
+  
     setSaving(true);
+  
     try {
-      if (isEditing) { await adminAPI.updateArticle(id, saveData); toast.success('تم الحفظ'); }
-      else { await adminAPI.createArticle(saveData); toast.success('تم الإنشاء'); }
+      if (isEditing) {
+        const { data } = await adminAPI.updateArticle(id, saveData);
+        toast.success('تم حفظ التعديلات بنجاح');
+      } else {
+        const { data } = await adminAPI.createArticle(saveData);
+        toast.success('تم إنشاء المقالة بنجاح');
+      }
+  
       navigate('/admin/articles');
-    } catch (e) { toast.error(e.response?.data?.message || 'خطأ'); }
-    finally { setSaving(false); }
+  
+    } catch (error) {
+      console.error('Save error:', error);
+      
+      const errorMsg = error.response?.data?.message 
+        || error.response?.data?.error 
+        || 'فشل الحفظ';
+      
+      toast.error(errorMsg);
+  
+      // ✅ عرض تفاصيل الخطأ في وضع التطوير
+      if (error.response?.data?.errors) {
+        console.error('Validation errors:', error.response.data.errors);
+      }
+  
+    } finally {
+      setSaving(false);
+    }
   };
 
   const addTag = () => { if (newTag.trim()) { setForm({ ...form, tags: [...form.tags, newTag.trim()] }); setNewTag(''); } };

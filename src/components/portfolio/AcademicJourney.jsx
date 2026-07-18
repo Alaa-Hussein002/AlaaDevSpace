@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   GraduationCap, Award, Calendar, ExternalLink, Medal,
-  BookOpen, Hash, Clock, ArrowLeft, Verified, Sparkles
+  BookOpen, Hash, Clock, ArrowLeft, Verified, Sparkles, Upload
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { publicAPI } from '@/api/services';
@@ -243,15 +243,18 @@ function EducationRoadmap({ educations }) {
 }
 
 /* ============================================ */
-/*  بطاقة شهادة                                 */
+/*  بطاقة شهادة - مُحسّنة                       */
 /* ============================================ */
-function CertificateCard({ cert, index }) {
+function CertificateCard({ cert, index, isCenterCard }) {
   const [hovered, setHovered] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-40px' });
 
   const amberShades = ['#f59e0b', '#d97706', '#b45309'];
   const shade = amberShades[index % amberShades.length];
+
+  // ✅ التحقق من وجود صورة الشهادة
+  const hasImage = cert.certificate_image && cert.certificate_image.trim() !== '';
 
   return (
     <motion.div
@@ -264,17 +267,22 @@ function CertificateCard({ cert, index }) {
       className="group"
     >
       <motion.div
-        animate={{ y: hovered ? -5 : 0 }}
+        animate={{ 
+          y: hovered ? -5 : 0,
+          scale: isCenterCard && !hovered ? 1.02 : 1 // ✅ تكبير البطاقة المركزية
+        }}
         transition={{ duration: 0.25 }}
         className={`relative overflow-hidden rounded-2xl border transition-all duration-400 ${
-          hovered
+          isCenterCard
+            ? 'border-amber-500/50 bg-card/95 shadow-xl shadow-amber-500/15' // ✅ تمييز البطاقة المركزية
+            : hovered
             ? 'border-amber-500/30 bg-card/90 shadow-2xl shadow-amber-500/10'
             : 'border-border/30 bg-card/50 shadow-sm'
         }`}
       >
         {/* توهج */}
         <motion.div
-          animate={{ opacity: hovered ? 0.08 : 0 }}
+          animate={{ opacity: isCenterCard ? 0.12 : hovered ? 0.08 : 0 }}
           className="absolute -inset-4 rounded-3xl blur-2xl -z-10"
           style={{ background: `radial-gradient(circle, ${shade}, transparent)` }}
         />
@@ -283,11 +291,11 @@ function CertificateCard({ cert, index }) {
         <motion.div
           className="absolute top-0 left-0 right-0 h-[2px]"
           style={{ background: `linear-gradient(90deg, transparent, ${shade}, transparent)` }}
-          animate={{ opacity: hovered ? 1 : 0.3, scaleX: hovered ? 1 : 0.4 }}
+          animate={{ opacity: isCenterCard ? 0.6 : hovered ? 1 : 0.3, scaleX: isCenterCard || hovered ? 1 : 0.4 }}
         />
 
-        {/* صورة الشهادة */}
-        {cert.certificate_image && (
+        {/* ✅ صورة الشهادة أو "قريباً" */}
+        {hasImage ? (
           <div className="relative h-32 overflow-hidden">
             <motion.img
               src={cert.certificate_image}
@@ -309,6 +317,85 @@ function CertificateCard({ cert, index }) {
               </motion.div>
             )}
           </div>
+        ) : (
+          // ✅ تصميم "قريباً" الاحترافي
+          <div className="relative h-32 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent" />
+            
+            {/* Pattern خلفية */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute inset-0" style={{
+                backgroundImage: `repeating-linear-gradient(45deg, ${shade}40 0, ${shade}40 1px, transparent 1px, transparent 10px)`
+              }} />
+            </div>
+
+            {/* محتوى "قريباً" */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <motion.div
+                animate={{ 
+                  y: [0, -8, 0],
+                  rotate: hovered ? 0 : [0, 5, -5, 0]
+                }}
+                transition={{ 
+                  duration: 2.5, 
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Upload className="w-8 h-8" style={{ color: `${shade}80` }} />
+              </motion.div>
+              
+              <div className="text-center">
+                <p className="text-sm font-bold mb-0.5" style={{ color: shade }}>
+                  قريباً
+                </p>
+                <p className="text-[9px] text-muted-foreground px-4">
+                  سيتم رفع الشهادة قريباً
+                </p>
+              </div>
+
+              {/* شرارات */}
+              <div className="absolute inset-0 pointer-events-none">
+                {[...Array(3)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute"
+                    style={{
+                      top: `${20 + i * 25}%`,
+                      left: `${10 + i * 30}%`,
+                    }}
+                    animate={{
+                      opacity: [0, 1, 0],
+                      scale: [0, 1, 0],
+                      rotate: [0, 180, 360],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      delay: i * 0.8,
+                    }}
+                  >
+                    <Sparkles className="w-3 h-3" style={{ color: `${shade}60` }} />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Badge "قيد التحميل" */}
+            <div className="absolute top-3 left-3">
+              <Badge 
+                className="text-[9px] h-5 border-0 shadow-lg"
+                style={{ 
+                  backgroundColor: `${shade}20`, 
+                  color: shade,
+                  border: `1px solid ${shade}30`
+                }}
+              >
+                <Clock className="w-2.5 h-2.5 ml-1 animate-spin" />
+                قيد التحميل
+              </Badge>
+            </div>
+          </div>
         )}
 
         <div className="p-4">
@@ -329,7 +416,7 @@ function CertificateCard({ cert, index }) {
 
             <div className="min-w-0 flex-1">
               <h4 className={`font-bold text-sm leading-tight line-clamp-2 transition-colors duration-300 ${
-                hovered ? 'text-foreground' : 'text-foreground/85'
+                hovered || isCenterCard ? 'text-foreground' : 'text-foreground/85'
               }`}>
                 {cert.title}
               </h4>
@@ -392,9 +479,9 @@ function CertificateCard({ cert, index }) {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-[10px] font-medium rounded-lg px-2.5 py-1 transition-all duration-300"
               style={{
-                backgroundColor: hovered ? `${shade}15` : `${shade}06`,
+                backgroundColor: hovered || isCenterCard ? `${shade}15` : `${shade}06`,
                 color: shade,
-                border: `1px solid ${hovered ? `${shade}25` : `${shade}10`}`,
+                border: `1px solid ${hovered || isCenterCard ? `${shade}25` : `${shade}10`}`,
               }}
               whileHover={{ x: -2 }}
             >
@@ -409,7 +496,7 @@ function CertificateCard({ cert, index }) {
         <motion.div
           className="h-[2px]"
           style={{ background: `linear-gradient(90deg, transparent, ${shade}, transparent)` }}
-          animate={{ scaleX: hovered ? 1 : 0 }}
+          animate={{ scaleX: hovered || isCenterCard ? 1 : 0 }}
           transition={{ duration: 0.3 }}
         />
       </motion.div>
@@ -418,7 +505,54 @@ function CertificateCard({ cert, index }) {
 }
 
 /* ============================================ */
-/*  القسم الرئيسي                               */
+/*  دالة ترتيب الشهادات - id=1 في المنتصف     */
+/* ============================================ */
+function reorderCertificates(certificates) {
+  if (certificates.length === 0) return [];
+  
+  // البحث عن الشهادة ذات id=1
+  const centerIndex = certificates.findIndex(cert => cert.id === 1);
+  
+  // إذا لم توجد id=1، نستخدم الشهادة الأولى
+  const centerCert = centerIndex !== -1 
+    ? certificates[centerIndex] 
+    : certificates[0];
+  
+  // باقي الشهادات
+  const otherCerts = certificates.filter(cert => cert.id !== centerCert.id);
+  
+  // الترتيب: يسار، مركز، يمين، يسار، يمين...
+  const reordered = [];
+  const left = [];
+  const right = [];
+  
+  otherCerts.forEach((cert, i) => {
+    if (i % 2 === 0) {
+      left.push(cert);
+    } else {
+      right.push(cert);
+    }
+  });
+  
+  // دمج بالترتيب
+  const maxLength = Math.max(left.length, right.length);
+  for (let i = 0; i < maxLength; i++) {
+    if (left[i]) reordered.push(left[i]);
+    if (i === 0) reordered.push(centerCert); // المركز بعد أول عنصر
+    if (right[i]) reordered.push(right[i]);
+  }
+  
+  // إذا لم يتم إضافة المركز بعد
+  if (!reordered.includes(centerCert)) {
+    const midIndex = Math.floor(reordered.length / 2);
+    reordered.splice(midIndex, 0, centerCert);
+  }
+  
+  return reordered;
+}
+
+/* ============================================ */
+/*  القسم الرئيسي - مُحسّن                      */
 /* ============================================ */
 export default function AcademicJourney() {
   const [educations, setEducations] = useState([]);
@@ -441,6 +575,10 @@ export default function AcademicJourney() {
   }, []);
 
   if (loading || (educations.length === 0 && certificates.length === 0)) return null;
+
+  // ✅ ترتيب الشهادات مع id=1 في المنتصف
+  const orderedCertificates = reorderCertificates(certificates);
+  const centerCertId = orderedCertificates.find(c => c.id === 1)?.id || orderedCertificates[Math.floor(orderedCertificates.length / 2)]?.id;
 
   return (
     <section className="py-24 px-4 relative overflow-hidden" dir="rtl">
@@ -504,38 +642,61 @@ export default function AcademicJourney() {
           <EducationRoadmap educations={educations} />
         )}
 
-        {/* ═══ الشهادات ═══ */}
-        {certificates.length > 0 && (
+        {/* ═══ الشهادات - مُحسّنة ═══ */}
+        {orderedCertificates.length > 0 && (
           <div>
+            {/* ✅ عنوان مركزي منسق */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="flex items-center gap-3 mb-8"
+              className="text-center mb-10"
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
-                style={{ background: 'linear-gradient(135deg, #f59e0bdd, #f59e0b88)', boxShadow: '0 4px 20px #f59e0b30' }}>
-                <Award className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold">الشهادات المهنية</h3>
-                  <Badge variant="outline" className="text-[10px] h-5 border-amber-500/40 text-amber-500">
-                    {certificates.length}
-                  </Badge>
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  whileInView={{ scale: 1, rotate: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ type: 'spring', delay: 0.2 }}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #f59e0bdd, #f59e0b88)', 
+                    boxShadow: '0 4px 20px #f59e0b30' 
+                  }}
+                >
+                  <Award className="w-6 h-6 text-white" />
+                </motion.div>
+                
+                <div>
+                  <h3 className="text-2xl font-bold mb-1">
+                    الشهادات <span className="gradient-text">المهنية</span>
+                  </h3>
+                  <div className="flex items-center justify-center gap-2">
+                    <Badge variant="outline" className="text-[10px] h-5 border-amber-500/40 text-amber-500">
+                      {orderedCertificates.length} شهادة
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      معتمدة في مجالات تقنية متعددة
+                    </span>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">شهادات معتمدة في مجالات تقنية متعددة</p>
               </div>
             </motion.div>
 
+            {/* ✅ Grid الشهادات المُرتبة */}
             <div className={`grid gap-4 ${
-              certificates.length === 1 ? 'grid-cols-1 max-w-sm' :
-              certificates.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl' :
-              certificates.length <= 4 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
+              orderedCertificates.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' :
+              orderedCertificates.length === 2 ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto' :
+              orderedCertificates.length <= 4 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
               'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
             }`}>
-              {certificates.map((cert, i) => (
-                <CertificateCard key={cert.id || i} cert={cert} index={i} />
+              {orderedCertificates.map((cert, i) => (
+                <CertificateCard 
+                  key={cert.id || i} 
+                  cert={cert} 
+                  index={i}
+                  isCenterCard={cert.id === centerCertId} // ✅ تمييز البطاقة المركزية
+                />
               ))}
             </div>
           </div>

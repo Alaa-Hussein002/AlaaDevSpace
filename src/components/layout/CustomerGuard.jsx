@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import useAuthStore from '@/store/authStore';
+import { toast } from 'sonner';
 
-export default function AuthGuard() {
-  const { isAuthenticated, fetchUser, sessionChecked } = useAuthStore();
+export default function CustomerGuard() {
+  const { isAuthenticated, user, fetchUser, sessionChecked } = useAuthStore();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -32,9 +33,15 @@ export default function AuthGuard() {
 
   // غير مسجل دخول
   if (!isAuthenticated) {
-    // toast.error('يجب تسجيل الدخول أولاً');
+    toast.error('يجب تسجيل الدخول أولاً');
     return <Navigate to="/login" replace />;
   }
+
+  // CUSTOMER_FEATURE: يمكن إضافة تحقق إضافي للعميل هنا
+  // if (user?.type !== 'customer') {
+  //   toast.error('هذه الصفحة مخصصة للعملاء فقط');
+  //   return <Navigate to="/" replace />;
+  // }
 
   return <Outlet />;
 }

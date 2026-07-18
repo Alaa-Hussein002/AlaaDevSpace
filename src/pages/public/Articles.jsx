@@ -7,11 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { publicAPI } from '@/api/services';
 import FavoriteButton from '@/components/ui/favorite-button';
+import SEO from '@/components/SEO';
+import { useSEO } from '@/hooks/useSEO';
 
 export default function Articles() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const { seoData, loading: seoLoading } = useSEO();
 
   useEffect(() => { load(); }, []);
 
@@ -26,12 +29,49 @@ export default function Articles() {
     }
   };
 
-  const filtered = articles.filter((article) => {
-    const title = article.title || '';
-    return title.includes(search) || (article.tags || []).some((t) => t.includes(search));
-  });
+  const filtered = search.trim() 
+    ? articles
+        .map((article) => {
+          const searchLower = search.toLowerCase().trim();
+          let score = 0;
+          
+          const title = (article.title || '').toLowerCase();
+          const excerpt = (article.excerpt || '').toLowerCase();
+          const category = (article.category || '').toLowerCase();
+          const tags = (article.tags || []).map(t => t.toLowerCase());
+  
+          // العنوان له وزن أكبر
+          if (title.includes(searchLower)) score += 10;
+          if (title.startsWith(searchLower)) score += 5;
+  
+          // التصنيف
+          if (category.includes(searchLower)) score += 5;
+  
+          // الوسوم
+          if (tags.some(t => t.includes(searchLower))) score += 3;
+  
+          // المقتطف
+          if (excerpt.includes(searchLower)) score += 1;
+  
+          return score > 0 ? { article, score } : null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.score - a.score)
+        .map(item => item.article)
+    : articles; // إذا البحث فارغ، أرجع كل المقالات كما هي
 
   return (
+    <>
+      {/* ✅ إضافة SEO */}
+      {!seoLoading && seoData && (
+        <SEO
+          title={`المقالات التقنية - ${seoData.title}`}
+          description="مقالات ودروس في البرمجة والتقنية وهندسة نظم المعلومات"
+          keywords={`مقالات, برمجة, دروس, ${seoData.keywords}, blog, articles`}
+          ogImage={seoData.photo}
+          ogType="website"
+        />
+      )}
     <div className="min-h-screen pt-24 pb-16 px-4" dir="rtl">
       <div className="max-w-5xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
@@ -71,9 +111,9 @@ export default function Articles() {
                 <Link to={`/blog/${article.slug}`}>
                   <Card className="overflow-hidden card-hover group border-border/50 bg-card/80">
                     <div className="flex flex-col sm:flex-row">
-                        <div className="absolute top-3 left-3">
+                        {/* <div className="absolute top-3 left-3">
                           <FavoriteButton item={article} type="article" />
-                        </div>
+                        </div> */}
                       <div className="sm:w-64 h-48 sm:h-auto bg-muted shrink-0 overflow-hidden">
                         {article.cover_image ? (
                           <img src={article.cover_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -126,5 +166,6 @@ export default function Articles() {
         )}
       </div>
     </div>
+    </>
   );
 }

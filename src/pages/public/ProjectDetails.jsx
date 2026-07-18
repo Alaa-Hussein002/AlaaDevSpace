@@ -11,6 +11,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { publicAPI } from '@/api/services';
+import SEO from '@/components/SEO';
+import { useSEO } from '@/hooks/useSEO';
 
 /* ============================================ */
 /*  معرض الصور                                  */
@@ -62,6 +64,7 @@ export default function ProjectDetails() {
   const { slug } = useParams();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { seoData } = useSEO();
 
   useEffect(() => { loadProject(); }, [slug]);
 
@@ -118,6 +121,15 @@ export default function ProjectDetails() {
   }
 
   return (
+    <>
+      {/* ✅ SEO ديناميكي للمشروع */}
+      <SEO
+        title={`${project.title?.ar || project.title?.en} - مشاريعي`}
+        description={project.short_description || project.description?.ar || ''}
+        keywords={`${project.title?.ar}, مشروع, ${project.tech_stack?.map(t => t.name || t).join(', ')}`}
+        ogImage={project.media?.thumbnail || seoData?.photo}
+        ogType="article"
+      />
     <div className="min-h-screen relative" dir="rtl">
       {/* خلفية خفيفة */}
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
@@ -344,5 +356,6 @@ export default function ProjectDetails() {
         </div>
       </div>
     </div>
+    </>
   );
 }
