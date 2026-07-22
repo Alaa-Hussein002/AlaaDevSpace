@@ -19,6 +19,7 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ```
 AlaaDevSpace
+├─ .env.production
 ├─ components.json
 ├─ eslint.config.js
 ├─ index.html
@@ -135,6 +136,7 @@ AlaaDevSpace
 │  │  ├─ cartStore.js
 │  │  └─ favoritesStore.js
 │  └─ styles
+├─ vercel.json
 └─ vite.config.js
 
 ```
