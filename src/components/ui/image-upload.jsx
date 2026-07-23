@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, Image, Loader2 } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { adminAPI } from '@/api/services';
@@ -8,6 +8,7 @@ import { adminAPI } from '@/api/services';
 export default function ImageUpload({ value, onChange, folder = 'general', label = 'صورة', className = '' }) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const inputRef = useRef(null);
 
   const handleFile = async (file) => {
@@ -16,6 +17,7 @@ export default function ImageUpload({ value, onChange, folder = 'general', label
     if (file.size > 10 * 1024 * 1024) return toast.error('الحد الأقصى 10 ميجا');
 
     setUploading(true);
+    setImgError(false); // إعادة ضبط حالة الخطأ عند رفع صورة جديدة
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -24,8 +26,8 @@ export default function ImageUpload({ value, onChange, folder = 'general', label
       const { data } = await adminAPI.uploadMedia(formData);
       const url = data.data?.file_url || data.data?.file_path;
 
-      // بناء الرابط الكامل
-      const fullUrl = url.startsWith('http') ? url : `http://localhost:8000${url}`;
+      // بناء الرابط المضمون (يدعم روابط Cloudinary والرابط المباشر)
+      const fullUrl = url?.startsWith('http') ? url : url;
       onChange(fullUrl);
       toast.success('تم رفع الصورة');
     } catch (e) {
@@ -43,12 +45,13 @@ export default function ImageUpload({ value, onChange, folder = 'general', label
   };
 
   const handleRemove = () => {
+    setImgError(false);
     onChange(null);
   };
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      <label className="text-sm font-medium">{label}</label>
+    <div className={`space-y-3 ${className}`}>
+      {label && <label className="text-sm font-medium">{label}</label>}
 
       <AnimatePresence mode="wait">
         {value ? (
@@ -57,32 +60,55 @@ export default function ImageUpload({ value, onChange, folder = 'general', label
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative group rounded-xl overflow-hidden border border-border bg-muted"
+            className="space-y-2"
           >
-            <img
-              src={value}
-              alt="Preview"
-              className="w-full h-40 object-cover"
-              onError={(e) => { e.target.src = ''; e.target.className = 'hidden'; }}
-            />
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+            {/* حاوية المعاينة */}
+            <div className="relative rounded-xl overflow-hidden border border-border bg-muted/30 aspect-square flex items-center justify-center">
+              {imgError ? (
+                <div className="flex flex-col items-center justify-center p-4 text-center text-muted-foreground">
+                  <ImageIcon className="w-10 h-10 mb-1 opacity-40" />
+                  <span className="text-xs">الصورة غير متاحة</span>
+                </div>
+              ) : (
+                <img
+                  src={value}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                  onError={() => setImgError(true)}
+                />
+              )}
+
+              {/* مؤشر التحميل في حال الرفع فوق صورة موجودة */}
+              {uploading && (
+                <div className="absolute inset-0 bg-background/70 backdrop-blur-xs flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                </div>
+              )}
+            </div>
+
+            {/* ✅ أزرار التحكم ظاهرة وثابتة أسفل الصورة دائمًا */}
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 size="sm"
-                variant="secondary"
-                className="rounded-lg text-xs"
+                variant="outline"
+                disabled={uploading}
+                className="flex-1 text-xs h-8 gap-1.5"
                 onClick={() => inputRef.current?.click()}
               >
+                <RefreshCw className="w-3.5 h-3.5" />
                 تغيير
               </Button>
               <Button
                 type="button"
                 size="sm"
                 variant="destructive"
-                className="rounded-lg text-xs"
+                disabled={uploading}
+                className="flex-1 text-xs h-8 gap-1.5"
                 onClick={handleRemove}
               >
-                <X className="w-3 h-3" />
+                <Trash2 className="w-3.5 h-3.5" />
+                حذف
               </Button>
             </div>
           </motion.div>
@@ -92,11 +118,14 @@ export default function ImageUpload({ value, onChange, folder = 'general', label
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
-              dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 hover:bg-muted/50'
+            className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all aspect-square flex flex-col items-center justify-center ${
+              dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 hover:bg-muted/30'
             }`}
             onClick={() => inputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
           >
@@ -107,13 +136,13 @@ export default function ImageUpload({ value, onChange, folder = 'general', label
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <Upload className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  اسحب الصورة هنا أو <span className="text-primary font-medium">اختر ملف</span>
-                </p>
-                <p className="text-[10px] text-muted-foreground/60">PNG, JPG, WEBP — حتى 10MB</p>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium">اضغط أو اسحب الصورة هنا</p>
+                  <p className="text-[10px] text-muted-foreground/70">PNG, JPG حتى 10MB</p>
+                </div>
               </div>
             )}
           </motion.div>
