@@ -23,11 +23,18 @@ const ensureArray = (value) => {
   return [];
 };
 
-const ensureObject = (value) => {
+// const ensureObject = (value) => {
+//   if (value && typeof value === 'object' && !Array.isArray(value)) {
+//     return value;
+//   }
+//   return {};
+// };
+
+const ensureObject = (value, defaults = {}) => {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
-    return value;
+    return { ...defaults, ...value };
   }
-  return {};
+  return defaults;
 };
 
 function SectionHeader({ icon: Icon, title, subtitle }) {
@@ -71,7 +78,14 @@ export default function AdminProfile() {
         bio: ensureObject(raw.bio),
         // location: ensureObject(raw.location),
         contact: ensureObject(raw.contact),
-        seo: ensureObject(raw.seo),
+        seo: ensureObject(raw.seo, {
+          title: '',
+          description: '',
+          keywords: '',
+          og_image: '',
+          type: 'website',
+          locale: 'ar_SA'
+        }),
         // المصفوفات
         rotating_roles: ensureArray(raw.rotating_roles),
         tech_display: ensureArray(raw.tech_display),
@@ -291,154 +305,220 @@ export default function AdminProfile() {
        </Card>
      </motion.div>
      
-     {/* ✅ 3. تحسين محركات البحث (SEO) ═══ */}
-     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-       <Card className="p-5 sm:p-6 border-border/50 space-y-5">
-         <SectionHeader 
-           icon={BarChart3} 
-           title="تحسين محركات البحث (SEO)" 
-           subtitle="ساعد محركات البحث على فهم موقعك بشكل أفضل" 
-         />
-     
-         <div className="space-y-2">
-           <Label className="flex items-center gap-2">
-             <span>عنوان الصفحة (Title)</span>
-             <Badge variant="secondary" className="text-[9px]">50-60 حرف</Badge>
-           </Label>
-           <Input 
-             value={profile.seo?.title || ''} 
-             onChange={(e) => setProfile({ 
-               ...profile, 
-               seo: { ...profile.seo, title: e.target.value } 
-             })} 
-             className="h-11 bg-background" 
-             placeholder="علاء حسين - مطور Full-Stack | Laravel & React" 
-             maxLength={60}
-           />
-           <p className="text-[10px] text-muted-foreground">
-             يظهر في نتائج البحث وعنوان التبويب
-           </p>
-         </div>
-     
-         <div className="space-y-2">
-           <Label className="flex items-center gap-2">
-             <span>الوصف (Description)</span>
-             <Badge variant="secondary" className="text-[9px]">150-160 حرف</Badge>
-           </Label>
-           <Textarea 
-             value={profile.seo?.description || ''} 
-             onChange={(e) => setProfile({ 
-               ...profile, 
-               seo: { ...profile.seo, description: e.target.value } 
-             })} 
-             className="min-h-[80px] bg-background resize-none text-sm leading-relaxed" 
-             placeholder="مطور Full-Stack متخصص في بناء تطبيقات ويب عصرية باستخدام Laravel و React. خبرة في تصميم الأنظمة وتطوير واجهات المستخدم..."
-             maxLength={160}
-           />
-           <p className="text-[10px] text-muted-foreground flex items-center justify-between">
-             <span>يظهر في نتائج البحث أسفل العنوان</span>
-             <span className={`font-mono ${(profile.seo?.description || '').length > 160 ? 'text-red-500' : ''}`}>
-               {(profile.seo?.description || '').length}/160
-             </span>
-           </p>
-         </div>
-     
-         <div className="space-y-2">
-           <Label className="flex items-center gap-2">
-             <span>الكلمات المفتاحية (Keywords)</span>
-             <Badge variant="secondary" className="text-[9px]">اختياري</Badge>
-           </Label>
-           <Input 
-             value={profile.seo?.keywords || ''} 
-             onChange={(e) => setProfile({ 
-               ...profile, 
-               seo: { ...profile.seo, keywords: e.target.value } 
-             })} 
-             className="h-11 bg-background" 
-             dir="ltr"
-             placeholder="Full Stack Developer, Laravel, React, Web Development, API"
-           />
-           <p className="text-[10px] text-muted-foreground">
-             افصل الكلمات بفواصل (,) - تستخدمها بعض محركات البحث
-           </p>
-         </div>
-     
-         <div className="space-y-2">
-           <Label className="flex items-center gap-2">
-             <span>صورة Open Graph</span>
-             <Badge variant="secondary" className="text-[9px]">للمشاركة على السوشيال ميديا</Badge>
-           </Label>
-           <div className="max-w-[300px]">
-             <ImageUpload 
-               value={profile.seo?.og_image} 
-               onChange={(url) => setProfile({ 
-                 ...profile, 
-                 seo: { ...profile.seo, og_image: url } 
-               })} 
-               folder="seo" 
-               label="" 
-             />
-           </div>
-           <p className="text-[10px] text-muted-foreground">
-             الحجم المثالي: 1200x630 بكسل (تظهر عند مشاركة الموقع على Facebook, Twitter, LinkedIn)
-           </p>
-         </div>
-     
-         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <div className="space-y-2">
-             <Label>نوع الموقع (Type)</Label>
-             <select
-               value={profile.seo?.type || 'website'}
-               onChange={(e) => setProfile({ 
-                 ...profile, 
-                 seo: { ...profile.seo, type: e.target.value } 
-               })}
-               className="w-full h-11 rounded-lg border border-border bg-background px-3 text-sm"
-             >
-               <option value="website">موقع ويب</option>
-               <option value="profile">ملف شخصي</option>
-               <option value="portfolio">معرض أعمال</option>
-             </select>
-           </div>
-     
-           <div className="space-y-2">
-             <Label>اللغة (Locale)</Label>
-             <select
-               value={profile.seo?.locale || 'ar_SA'}
-               onChange={(e) => setProfile({ 
-                 ...profile, 
-                 seo: { ...profile.seo, locale: e.target.value } 
-               })}
-               className="w-full h-11 rounded-lg border border-border bg-background px-3 text-sm"
-             >
-               <option value="ar_SA">العربية (السعودية)</option>
-               <option value="ar_EG">العربية (مصر)</option>
-               <option value="ar_YE">العربية (اليمن)</option>
-               <option value="en_US">English (US)</option>
-             </select>
-           </div>
-         </div>
-     
-         {/* معاينة في نتائج البحث */}
-         <div className="mt-6 p-4 rounded-xl bg-muted/30 border border-border/30">
-           <p className="text-[10px] font-medium text-muted-foreground mb-3 flex items-center gap-2">
-             <BarChart3 className="w-3 h-3" />
-             معاينة في نتائج البحث
-           </p>
-           <div className="space-y-1">
-             <p className="text-blue-600 text-sm font-medium line-clamp-1">
-               {profile.seo?.title || profile.full_name?.ar || 'عنوان الموقع'}
-             </p>
-             <p className="text-[10px] text-green-700" dir="ltr">
-               {typeof window !== 'undefined' ? window.location.origin : 'https://yoursite.com'}
-             </p>
-             <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-               {profile.seo?.description || profile.bio?.ar || 'وصف الموقع يظهر هنا...'}
-             </p>
-           </div>
-         </div>
-       </Card>
-     </motion.div>
+      {/* ✅ 3. تحسين محركات البحث (SEO) ═══ */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <Card className="p-5 sm:p-6 border-border/50 space-y-5">
+          <SectionHeader 
+            icon={BarChart3} 
+            title="تحسين محركات البحث (SEO)" 
+            subtitle="ساعد محركات البحث على فهم موقعك بشكل أفضل" 
+          />
+      
+          {/* عنوان الصفحة */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <span>عنوان الصفحة (Title)</span>
+              <Badge variant="secondary" className="text-[9px]">50-60 حرف</Badge>
+            </Label>
+            <Input 
+              value={profile.seo?.title || ''} 
+              onChange={(e) => setProfile({ 
+                ...profile, 
+                seo: { 
+                  ...(profile.seo || {}), 
+                  title: e.target.value 
+                } 
+              })} 
+              className="h-11 bg-background" 
+              placeholder="علاء حسين - مطور Full-Stack | Laravel & React" 
+              maxLength={60}
+            />
+            <p className="text-[10px] text-muted-foreground flex items-center justify-between">
+              <span>يظهر في نتائج البحث وعنوان التبويب</span>
+              <span className={`font-mono ${(profile.seo?.title || '').length > 60 ? 'text-red-500' : 'text-green-600'}`}>
+                {(profile.seo?.title || '').length}/60
+              </span>
+            </p>
+          </div>
+      
+          {/* الوصف */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <span>الوصف (Description)</span>
+              <Badge variant="secondary" className="text-[9px]">150-160 حرف</Badge>
+            </Label>
+            <Textarea 
+              value={profile.seo?.description || ''} 
+              onChange={(e) => setProfile({ 
+                ...profile, 
+                seo: { 
+                  ...(profile.seo || {}), 
+                  description: e.target.value 
+                } 
+              })} 
+              className="min-h-[80px] bg-background resize-none text-sm leading-relaxed" 
+              placeholder="مطور Full-Stack متخصص في بناء تطبيقات ويب عصرية باستخدام Laravel و React. خبرة في تصميم الأنظمة وتطوير واجهات المستخدم..."
+              maxLength={160}
+            />
+            <p className="text-[10px] text-muted-foreground flex items-center justify-between">
+              <span>يظهر في نتائج البحث أسفل العنوان</span>
+              <span className={`font-mono ${(profile.seo?.description || '').length > 160 ? 'text-red-500' : 'text-green-600'}`}>
+                {(profile.seo?.description || '').length}/160
+              </span>
+            </p>
+          </div>
+      
+          {/* الكلمات المفتاحية */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <span>الكلمات المفتاحية (Keywords)</span>
+              <Badge variant="secondary" className="text-[9px]">اختياري</Badge>
+            </Label>
+            <Input 
+              value={profile.seo?.keywords || ''} 
+              onChange={(e) => setProfile({ 
+                ...profile, 
+                seo: { 
+                  ...(profile.seo || {}), 
+                  keywords: e.target.value 
+                } 
+              })} 
+              className="h-11 bg-background" 
+              dir="ltr"
+              placeholder="Full Stack Developer, Laravel, React, Web Development, API"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              افصل الكلمات بفواصل (,) - تستخدمها بعض محركات البحث
+            </p>
+          </div>
+      
+          {/* صورة Open Graph */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <span>صورة Open Graph</span>
+              <Badge variant="secondary" className="text-[9px]">للمشاركة على السوشيال ميديا</Badge>
+            </Label>
+            <div className="max-w-[300px]">
+              <ImageUpload 
+                value={profile.seo?.og_image || ''} 
+                onChange={(url) => setProfile({ 
+                  ...profile, 
+                  seo: { 
+                    ...(profile.seo || {}), 
+                    og_image: url 
+                  } 
+                })} 
+                folder="seo" 
+                label="" 
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              الحجم المثالي: 1200x630 بكسل (تظهر عند مشاركة الموقع على Facebook, Twitter, LinkedIn)
+            </p>
+          </div>
+      
+          {/* نوع الموقع واللغة */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>نوع الموقع (Type)</Label>
+              <select
+                value={profile.seo?.type || 'website'}
+                onChange={(e) => setProfile({ 
+                  ...profile, 
+                  seo: { 
+                    ...(profile.seo || {}), 
+                    type: e.target.value 
+                  } 
+                })}
+                className="w-full h-11 rounded-lg border border-border bg-background px-3 text-sm"
+              >
+                <option value="website">موقع ويب</option>
+                <option value="profile">ملف شخصي</option>
+                <option value="portfolio">معرض أعمال</option>
+              </select>
+            </div>
+      
+            <div className="space-y-2">
+              <Label>اللغة (Locale)</Label>
+              <select
+                value={profile.seo?.locale || 'ar_SA'}
+                onChange={(e) => setProfile({ 
+                  ...profile, 
+                  seo: { 
+                    ...(profile.seo || {}), 
+                    locale: e.target.value 
+                  } 
+                })}
+                className="w-full h-11 rounded-lg border border-border bg-background px-3 text-sm"
+              >
+                <option value="ar_SA">العربية (السعودية)</option>
+                <option value="ar_EG">العربية (مصر)</option>
+                <option value="ar_YE">العربية (اليمن)</option>
+                <option value="en_US">English (US)</option>
+              </select>
+            </div>
+          </div>
+      
+          {/* ✅ معاينة محسّنة */}
+          <div className="mt-6 p-4 rounded-xl bg-muted/30 border border-border/30 space-y-4">
+            <p className="text-[10px] font-medium text-muted-foreground mb-3 flex items-center gap-2">
+              <BarChart3 className="w-3 h-3" />
+              معاينة في نتائج البحث (Google)
+            </p>
+            
+            {/* معاينة Google */}
+            <div className="space-y-1">
+              <p className="text-blue-600 dark:text-blue-400 text-sm font-medium line-clamp-1">
+                {profile.seo?.title || profile.full_name?.ar || 'عنوان الموقع'}
+              </p>
+              <p className="text-[10px] text-green-700 dark:text-green-600" dir="ltr">
+                {typeof window !== 'undefined' ? window.location.origin : 'https://yoursite.com'} › home
+              </p>
+              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                {profile.seo?.description || profile.bio?.ar || 'وصف الموقع يظهر هنا في نتائج البحث...'}
+              </p>
+            </div>
+      
+            {/* معاينة Social Media */}
+            {profile.seo?.og_image && (
+              <div className="pt-4 border-t border-border/30 space-y-2">
+                <p className="text-[9px] text-muted-foreground font-medium">
+                  معاينة عند المشاركة (Facebook / Twitter / LinkedIn):
+                </p>
+                <div className="border border-border/50 rounded-lg overflow-hidden bg-background max-w-md">
+                  <div className="aspect-[1.91/1] w-full overflow-hidden bg-muted">
+                    <img 
+                      src={profile.seo.og_image} 
+                      alt="OG Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-3 space-y-0.5">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide" dir="ltr">
+                      {typeof window !== 'undefined' ? window.location.hostname : 'yoursite.com'}
+                    </p>
+                    <p className="text-sm font-semibold line-clamp-1">
+                      {profile.seo?.title || profile.full_name?.ar || 'عنوان'}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-2">
+                      {profile.seo?.description || profile.bio?.ar || 'وصف'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+      
+            {/* رسالة تحفيزية */}
+            {!profile.seo?.og_image && (
+              <div className="text-center py-2">
+                <p className="text-[10px] text-muted-foreground">
+                  💡 أضف صورة Open Graph لمعاينة كاملة
+                </p>
+              </div>
+            )}
+          </div>
+        </Card>
+      </motion.div>
 
       {/* ═══ 4. الأدوار المتناوبة ═══ */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
