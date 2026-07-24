@@ -34,9 +34,9 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
+  // useEffect(() => {
+  //   loadDashboard();
+  // }, []);
 
   // const loadDashboard = async () => {
   //   try {
