@@ -38,16 +38,16 @@ export default function Dashboard() {
     loadDashboard();
   }, []);
 
-  const loadDashboard = async () => {
-    try {
-      const { data: res } = await adminAPI.getDashboard();
-      setData(res.data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const loadDashboard = async () => {
+  //   try {
+  //     const { data: res } = await adminAPI.getDashboard();
+  //     setData(res.data);
+  //   } catch (e) {
+  //     console.error(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   if (loading) {
     return (
