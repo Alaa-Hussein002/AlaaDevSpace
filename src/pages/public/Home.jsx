@@ -608,7 +608,7 @@ const FloatingCodeBlock = ({ profile }) => {
         <div className="w-[380px] rounded-2xl border border-border/50 bg-[#0d1117]/90 backdrop-blur-xl shadow-2xl overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5">
             <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-500/80" /><div className="w-3 h-3 rounded-full bg-yellow-500/80" /><div className="w-3 h-3 rounded-full bg-green-500/80" /></div>
-            <span className="text-[11px] text-white/30 font-mono mr-3">developer.js</span>
+            <span className="text-[11px] text-white/30 font-mono mr-3">AlaaHussein.js</span>
           </div>
           <div className="p-4 font-mono text-sm leading-7" dir="ltr">
             {codeLines.map((line, i) => (
