@@ -343,6 +343,16 @@ export default function AdminExperiences() {
   };
 
   const handleDelete = async (id) => {
+    // 🔴 طباعة للفحص
+    console.log('═══════════════════════════════');
+    console.log('🔍 Delete - ID:', id);
+    console.log('🔍 Delete - ID Type:', typeof id);
+    console.log('═══════════════════════════════');
+    
+    if (!id) {
+      toast.error('❌ خطأ: ID غير موجود');
+      return;
+    }
     if (!confirm('هل تريد حذف هذه الخبرة؟')) return;
     try {
       // ✅ الحذف - يمرر الـ ID
@@ -350,12 +360,26 @@ export default function AdminExperiences() {
       toast.success('تم الحذف');
       load();
     } catch (e) { 
+      console.error('❌ Delete Error:', e);
+      console.error('❌ Response:', e.response?.data);
       toast.error('فشل الحذف'); 
-      console.error(e);
+      // console.error(e);
     }
   };
 
   const handleToggle = async (item) => {
+      // 🔴 طباعة للفحص
+    console.log('═══════════════════════════════');
+    console.log('🔍 Toggle - Full Item:', item);
+    console.log('🔍 Toggle - ID:', item.id);
+    console.log('🔍 Toggle - ID Type:', typeof item.id);
+    console.log('═══════════════════════════════');
+    
+    if (!item.id) {
+      toast.error('❌ خطأ: ID غير موجود');
+      return;
+    }
+
     try {
       // ✅ Toggle - يمرر الـ ID + البيانات الكاملة
       await adminAPI.updateExperience(item.id, {
@@ -365,8 +389,10 @@ export default function AdminExperiences() {
       toast.success(item.is_published ? 'تم إخفاء الخبرة' : 'تم إظهار الخبرة');
       load();
     } catch (e) { 
+      console.error('❌ Toggle Error:', e);
+      console.error('❌ Response:', e.response?.data);
       toast.error('فشل التحديث'); 
-      console.error(e);
+      // console.error(e);
     }
   };
 
