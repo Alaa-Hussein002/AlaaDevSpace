@@ -1256,7 +1256,7 @@ const TechStack = ({ profile }) => {
                     style={{ backgroundColor: isHovered ? `${item.color}18` : `${item.color}08` }}
                   >
                     {item.type === 'image' && item.icon ? (
-                      <img src={item.icon} alt={item.name} className="w-full h-full object-contain p-0.5" />
+                      <img src={item.icon} alt={item.name} className="w-full h-full object-contain p-0.1" />
                     ) : item.LucideIcon ? (
                       <item.LucideIcon className="w-4 h-4" style={{ color: item.color }} />
                     ) : (
