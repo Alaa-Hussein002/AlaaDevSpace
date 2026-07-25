@@ -1198,84 +1198,84 @@ const SectionsGrid = () => {
 /* ============================================ */
 /*  Tech Stack - ديناميكي بالكامل               */
 /* ============================================ */
-// const TechStack = ({ profile }) => {
-//   const [hoveredIndex, setHoveredIndex] = useState(null);
+const TechStack = ({ profile }) => {
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
-//   const tools = useMemo(() => profile?.tools || [], [profile?.tools]);
-//   const techDisplay = useMemo(() => profile?.tech_display || [], [profile?.tech_display]);
+  const tools = useMemo(() => profile?.tools || [], [profile?.tools]);
+  const techDisplay = useMemo(() => profile?.tech_display || [], [profile?.tech_display]);
 
-//   const defaultIcons = useMemo(() => [Braces, Code2, Database, Zap, Globe, GitBranch, Cpu, MonitorSmartphone], []);
-//   const colors = useMemo(() => ['#3b82f6', '#ef4444', '#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#6366f1'], []);
+  const defaultIcons = useMemo(() => [Braces, Code2, Database, Zap, Globe, GitBranch, Cpu, MonitorSmartphone], []);
+  const colors = useMemo(() => ['#3b82f6', '#ef4444', '#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#6366f1'], []);
 
-//   const items = useMemo(() => {
-//     const hasTools = tools.length > 0;
-//     return hasTools
-//       ? tools.map((tool, i) => ({ name: tool.name, icon: tool.icon, type: 'image', color: colors[i % colors.length] }))
-//       : techDisplay.map((name, i) => ({ name, icon: null, type: 'lucide', color: colors[i % colors.length], LucideIcon: defaultIcons[i % defaultIcons.length] }));
-//   }, [tools, techDisplay, colors, defaultIcons]);
+  const items = useMemo(() => {
+    const hasTools = tools.length > 0;
+    return hasTools
+      ? tools.map((tool, i) => ({ name: tool.name, icon: tool.icon, type: 'image', color: colors[i % colors.length] }))
+      : techDisplay.map((name, i) => ({ name, icon: null, type: 'lucide', color: colors[i % colors.length], LucideIcon: defaultIcons[i % defaultIcons.length] }));
+  }, [tools, techDisplay, colors, defaultIcons]);
 
-//   if (items.length === 0) return null;
+  if (items.length === 0) return null;
 
-//   return (
-//     <section className="py-16 relative overflow-hidden" dir="rtl">
-//       <div className="absolute inset-0 grid-bg opacity-20" />
+  return (
+    <section className="py-16 relative overflow-hidden" dir="rtl">
+      <div className="absolute inset-0 grid-bg opacity-20" />
 
-//       <div className="relative z-10 max-w-3xl mx-auto px-4">
-//         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
-//           <h2 className="text-2xl font-bold mb-2">التقنيات <span className="gradient-text">والأدوات</span></h2>
-//           <p className="text-xs text-muted-foreground">أدوات أستخدمها يومياً لبناء منتجات عالية الجودة</p>
-//         </motion.div>
+      <div className="relative z-10 max-w-3xl mx-auto px-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
+          <h2 className="text-2xl font-bold mb-2">التقنيات <span className="gradient-text">والأدوات</span></h2>
+          <p className="text-xs text-muted-foreground">أدوات أستخدمها يومياً لبناء منتجات عالية الجودة</p>
+        </motion.div>
 
-//         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-//           {items.map((item, i) => {
-//             const isHovered = hoveredIndex === i;
-//             return (
-//               <motion.div
-//                 key={i}
-//                 initial={{ opacity: 0, scale: 0.8 }}
-//                 whileInView={{ opacity: 1, scale: 1 }}
-//                 viewport={{ once: true }}
-//                 transition={{ delay: i * 0.04, type: 'spring', stiffness: 200 }}
-//                 onMouseEnter={() => setHoveredIndex(i)}
-//                 onMouseLeave={() => setHoveredIndex(null)}
-//               >
-//                 <motion.div
-//                   animate={{
-//                     scale: isHovered ? 1.08 : hoveredIndex !== null ? 0.97 : 1,
-//                     opacity: hoveredIndex !== null && !isHovered ? 0.4 : 1,
-//                   }}
-//                   transition={{ duration: 0.25 }}
-//                   className={`relative overflow-hidden rounded-xl border p-3.5 flex items-center gap-2.5 cursor-default transition-all duration-300 ${isHovered ? 'border-primary/50 bg-card shadow-lg shadow-primary/10' : 'border-border/30 bg-card/40'}`}
-//                 >
-//                   <motion.div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${item.color}, transparent)` }} animate={{ scaleX: isHovered ? 1 : 0, opacity: isHovered ? 0.7 : 0 }} transition={{ duration: 0.4 }} />
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          {items.map((item, i) => {
+            const isHovered = hoveredIndex === i;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04, type: 'spring', stiffness: 200 }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <motion.div
+                  animate={{
+                    scale: isHovered ? 1.08 : hoveredIndex !== null ? 0.97 : 1,
+                    opacity: hoveredIndex !== null && !isHovered ? 0.4 : 1,
+                  }}
+                  transition={{ duration: 0.25 }}
+                  className={`relative overflow-hidden rounded-xl border p-3.5 flex items-center gap-2.5 cursor-default transition-all duration-300 ${isHovered ? 'border-primary/50 bg-card shadow-lg shadow-primary/10' : 'border-border/30 bg-card/40'}`}
+                >
+                  <motion.div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${item.color}, transparent)` }} animate={{ scaleX: isHovered ? 1 : 0, opacity: isHovered ? 0.7 : 0 }} transition={{ duration: 0.4 }} />
 
-//                   <motion.div
-//                     animate={{ scale: isHovered ? 1.1 : 1, rotate: isHovered ? [0, -3, 3, 0] : 0 }}
-//                     transition={{ duration: 0.4 }}
-//                     className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
-//                     style={{ backgroundColor: isHovered ? `${item.color}18` : `${item.color}08` }}
-//                   >
-//                     {item.type === 'image' && item.icon ? (
-//                       <img src={item.icon} alt={item.name} className="w-4.5 h-4.5 object-contain" />
-//                     ) : item.LucideIcon ? (
-//                       <item.LucideIcon className="w-4 h-4" style={{ color: item.color }} />
-//                     ) : (
-//                       <Cpu className="w-4 h-4" style={{ color: item.color }} />
-//                     )}
-//                   </motion.div>
+                  <motion.div
+                    animate={{ scale: isHovered ? 1.1 : 1, rotate: isHovered ? [0, -3, 3, 0] : 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
+                    style={{ backgroundColor: isHovered ? `${item.color}18` : `${item.color}08` }}
+                  >
+                    {item.type === 'image' && item.icon ? (
+                      <img src={item.icon} alt={item.name} className="w-4.5 h-4.5 object-contain" />
+                    ) : item.LucideIcon ? (
+                      <item.LucideIcon className="w-4 h-4" style={{ color: item.color }} />
+                    ) : (
+                      <Cpu className="w-4 h-4" style={{ color: item.color }} />
+                    )}
+                  </motion.div>
 
-//                   <span className="text-xs font-medium truncate" style={{ color: isHovered ? item.color : undefined }}>{item.name}</span>
+                  <span className="text-xs font-medium truncate" style={{ color: isHovered ? item.color : undefined }}>{item.name}</span>
 
-//                   <motion.div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${item.color}, transparent)` }} animate={{ scaleX: isHovered ? 1 : 0, opacity: isHovered ? 0.5 : 0 }} transition={{ duration: 0.3, delay: 0.1 }} />
-//                 </motion.div>
-//               </motion.div>
-//             );
-//           })}
-//         </div>
-//       </div>
-//     </section>
-//   );
-// };
+                  <motion.div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${item.color}, transparent)` }} animate={{ scaleX: isHovered ? 1 : 0, opacity: isHovered ? 0.5 : 0 }} transition={{ duration: 0.3, delay: 0.1 }} />
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 /* ============================================ */
 /*  CTA Section                                 */
