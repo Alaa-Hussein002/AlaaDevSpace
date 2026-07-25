@@ -1252,15 +1252,15 @@ const TechStack = ({ profile }) => {
                   <motion.div
                     animate={{ scale: isHovered ? 1.1 : 1, rotate: isHovered ? [0, -3, 3, 0] : 0 }}
                     transition={{ duration: 0.4 }}
-                    className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
                     style={{ backgroundColor: isHovered ? `${item.color}18` : `${item.color}08` }}
                   >
                     {item.type === 'image' && item.icon ? (
-                      <img src={item.icon} alt={item.name} className="w-7 h-7 object-contain" />
+                      <img src={item.icon} alt={item.name} className="w-full h-full object-contain p-0.5" />
                     ) : item.LucideIcon ? (
-                      <item.LucideIcon className="w-6 h-6" style={{ color: item.color }} />
+                      <item.LucideIcon className="w-4 h-4" style={{ color: item.color }} />
                     ) : (
-                      <Cpu className="w-6 h-6" style={{ color: item.color }} />
+                      <Cpu className="w-4 h-4" style={{ color: item.color }} />
                     )}
                   </motion.div>
 
