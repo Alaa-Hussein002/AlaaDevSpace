@@ -1,3 +1,269 @@
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Plus, Pencil, Trash2, Briefcase, Loader2, Eye, EyeOff,
+  MapPin, Calendar, Award, Code2, ChevronDown, Building2,
+  Clock, Star, ArrowUpDown, Zap
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
+} from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { adminAPI } from '@/api/services';
+import ImageUpload from '@/components/ui/image-upload';
+
+/* ============================================ */
+/*  ثوابت                                      */
+/* ============================================ */
+const TYPE_CONFIG = {
+  full_time:  { label: 'دوام كامل', color: '#3b82f6', icon: Building2 },
+  part_time:  { label: 'دوام جزئي', color: '#8b5cf6', icon: Clock },
+  freelance:  { label: 'عمل حر',   color: '#10b981', icon: Zap },
+  internship: { label: 'تدريب',    color: '#f59e0b', icon: Award },
+  contract:   { label: 'عقد',      color: '#ec4899', icon: Briefcase },
+};
+
+const emptyForm = {
+  company: { ar: '', en: '' },
+  position: { ar: '', en: '' },
+  description: { ar: '', en: '' },
+  company_logo: null,
+  location: '',
+  type: 'full_time',
+  start_date: '',
+  end_date: '',
+  is_current: false,
+  achievements: [],
+  technologies_used: [],
+  sort_order: 0,
+  is_published: true,
+};
+
+/* ============================================ */
+/*  حساب المدة                                  */
+/* ============================================ */
+function calcDuration(start, end, isCurrent) {
+  if (!start) return '';
+  const s = new Date(start);
+  const e = isCurrent ? new Date() : (end ? new Date(end) : new Date());
+  let months = (e.getFullYear() - s.getFullYear()) * 12 + e.getMonth() - s.getMonth();
+  if (months < 0) months = 0;
+  const years = Math.floor(months / 12);
+  const rem = months % 12;
+  if (years > 0 && rem > 0) return `${years} سنة و ${rem} شهر`;
+  if (years > 0) return `${years} سنة`;
+  if (rem > 0) return `${rem} شهر`;
+  return 'أقل من شهر';
+}
+
+function formatDate(date) {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toLocaleDateString('ar', { year: 'numeric', month: 'short' });
+}
+
+/* ============================================ */
+/*  بطاقة خبرة واحدة                           */
+/* ============================================ */
+function ExperienceCard({ item, index, onEdit, onDelete, onToggle }) {
+  const config = TYPE_CONFIG[item.type] || TYPE_CONFIG.full_time;
+  const TypeIcon = config.icon;
+  const duration = calcDuration(item.start_date, item.end_date, item.is_current);
+  const achCount = (item.achievements || []).length;
+  const techCount = (item.technologies_used || []).length;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06, duration: 0.4 }}
+      layout
+    >
+      <Card className={`group relative overflow-hidden border-border/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 ${
+        !item.is_published ? 'opacity-50' : ''
+      }`}>
+        {/* خط جانبي ملون */}
+        <div
+          className="absolute top-0 bottom-0 right-0 w-[3px]"
+          style={{ background: `linear-gradient(to bottom, ${config.color}, ${config.color}44)` }}
+        />
+
+        <div className="p-4 sm:p-5 pr-5 sm:pr-6">
+
+          {/* الصف العلوي: الشعار + المعلومات + الأزرار */}
+          <div className="flex items-start gap-3 sm:gap-4">
+
+            {/* شعار الشركة */}
+            <div
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 border"
+              style={{ borderColor: `${config.color}25`, backgroundColor: `${config.color}08` }}
+            >
+              {item.company_logo ? (
+                <img src={item.company_logo} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <TypeIcon className="w-6 h-6" style={{ color: `${config.color}60` }} />
+                </div>
+              )}
+            </div>
+
+            {/* المعلومات */}
+            <div className="flex-1 min-w-0">
+              {/* المسمى الوظيفي */}
+              <h3 className="font-bold text-sm sm:text-base leading-tight truncate">
+                {item.position?.ar || item.position?.en || 'بدون مسمى'}
+              </h3>
+
+              {/* الشركة */}
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
+                {item.company?.ar || item.company?.en}
+              </p>
+
+              {/* الشارات */}
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                {/* نوع العمل */}
+                <Badge
+                  variant="outline"
+                  className="text-[9px] sm:text-[10px] h-5 gap-1"
+                  style={{ borderColor: `${config.color}30`, color: config.color }}
+                >
+                  <TypeIcon className="w-2.5 h-2.5" />
+                  {config.label}
+                </Badge>
+
+                {/* الموقع */}
+                {item.location && (
+                  <Badge variant="secondary" className="text-[9px] sm:text-[10px] h-5 gap-1">
+                    <MapPin className="w-2.5 h-2.5" />
+                    {item.location}
+                  </Badge>
+                )}
+
+                {/* حالي */}
+                {item.is_current && (
+                  <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-[9px] h-5 gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    يعمل حالياً
+                  </Badge>
+                )}
+              </div>
+
+              {/* التاريخ والمدة */}
+              <div className="flex items-center gap-2 mt-2 text-[10px] sm:text-[11px] text-muted-foreground">
+                <Calendar className="w-3 h-3 shrink-0" />
+                <span>
+                  {formatDate(item.start_date)} — {item.is_current ? 'الآن' : formatDate(item.end_date)}
+                </span>
+                {duration && (
+                  <>
+                    <span className="w-1 h-1 rounded-full bg-border" />
+                    <span className="font-medium" style={{ color: config.color }}>{duration}</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* أزرار التحكم */}
+            <div className="flex flex-col sm:flex-row items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg"
+                onClick={() => onToggle(item)}
+                title={item.is_published ? 'إخفاء' : 'إظهار'}
+              >
+                {item.is_published ? (
+                  <Eye className="w-3.5 h-3.5 text-green-500" />
+                ) : (
+                  <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg"
+                onClick={() => onEdit(item)}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                onClick={() => onDelete(item.id)}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* الإنجازات والتقنيات */}
+          {(achCount > 0 || techCount > 0) && (
+            <div className="mt-3 pt-3 border-t border-border/30">
+              {/* الإنجازات */}
+              {achCount > 0 && (
+                <div className="space-y-1 mb-2">
+                  {(item.achievements || []).slice(0, 3).map((a, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Award className="w-3 h-3 mt-0.5 shrink-0" style={{ color: config.color }} />
+                      <span className="line-clamp-1">{a}</span>
+                    </div>
+                  ))}
+                  {achCount > 3 && (
+                    <p className="text-[10px] text-muted-foreground/50 pr-5">
+                      +{achCount - 3} إنجازات أخرى
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* التقنيات */}
+              {techCount > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {(item.technologies_used || []).slice(0, 6).map((t, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-0.5 text-[9px] rounded-md font-medium"
+                      style={{
+                        backgroundColor: `${config.color}08`,
+                        color: config.color,
+                        border: `1px solid ${config.color}15`,
+                      }}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                  {techCount > 6 && (
+                    <span className="px-2 py-0.5 text-[9px] rounded-md bg-muted text-muted-foreground">
+                      +{techCount - 6}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* شارة مخفي */}
+        {!item.is_published && (
+          <div className="absolute top-3 left-3">
+            <Badge variant="secondary" className="text-[9px] bg-muted">
+              <EyeOff className="w-2.5 h-2.5 ml-1" /> مخفي
+            </Badge>
+          </div>
+        )}
+      </Card>
+    </motion.div>
+  );
+}
+
 /* ============================================ */
 /*  الصفحة الرئيسية: إدارة الخبرات              */
 /* ============================================ */
