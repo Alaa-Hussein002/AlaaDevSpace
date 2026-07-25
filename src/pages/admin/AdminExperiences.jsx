@@ -339,14 +339,34 @@ export default function AdminExperiences() {
     }
   };
 
+  // const handleDelete = async (id) => {
+  //   if (!confirm('هل تريد حذف هذه الخبرة؟')) return;
+  //   try {
+  //     await adminAPI.deleteExperience(id);
+  //     toast.success('تم الحذف');
+  //     load();
+  //   } catch (e) { toast.error('فشل الحذف'); }
+  // };
+
   const handleDelete = async (id) => {
-    if (!confirm('هل تريد حذف هذه الخبرة؟')) return;
-    try {
-      await adminAPI.deleteExperience(id);
-      toast.success('تم الحذف');
-      load();
-    } catch (e) { toast.error('فشل الحذف'); }
-  };
+  if (!confirm('هل أنت تأكد من رغبتك في حذف هذه الخبرة؟')) return;
+
+  // الاحتفاظ بالنسخة القديمة في حال فشل الحذف على السيرفر
+  const previousItems = [...items];
+
+  // تحديث الـ State فوراً لتحسين UX
+  setItems((prev) => prev.filter((item) => item.id !== id));
+
+  try {
+    await adminAPI.deleteExperience(id);
+    toast.success('تم الحذف بنجاح');
+  } catch (e) {
+    // إعادة البيانات كما كانت في حالة حدوث خطأ
+    setItems(previousItems);
+    const errorMsg = e.response?.data?.message || 'فشل الحذف، يرجى المحاولة لاحقاً';
+    toast.error(errorMsg);
+  }
+};
 
   const handleToggle = async (item) => {
   try {
