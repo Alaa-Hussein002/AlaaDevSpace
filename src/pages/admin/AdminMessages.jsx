@@ -371,68 +371,63 @@ export default function AdminMessages() {
       {/* Tabs - محسّنة للموبايل */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tabs List - Scrollable on mobile */}
-        <div className="relative">
-          <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-xl overflow-x-auto scrollbar-hide">
-            <div className="flex gap-1 min-w-max">
-              <TabsTrigger 
-                value="all" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-              >
-                <Inbox className="w-4 h-4" />
-                <span className="text-sm font-medium">الكل</span>
-                <Badge variant="secondary" className="text-xs h-5 min-w-[20px] px-1.5">
-                  {stats.total}
-                </Badge>
-              </TabsTrigger>
-      
-              <TabsTrigger 
-                value="unread" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-              >
-                <Mail className="w-4 h-4" />
-                <span className="text-sm font-medium">جديدة</span>
-                {stats.unread > 0 && (
-                  <Badge className="bg-primary text-primary-foreground text-xs h-5 min-w-[20px] px-1.5">
-                    {stats.unread}
-                  </Badge>
-                )}
-              </TabsTrigger>
-      
-              <TabsTrigger 
-                value="read" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-              >
-                <MailOpen className="w-4 h-4" />
-                <span className="text-sm font-medium">مقروءة</span>
-              </TabsTrigger>
-      
-              <TabsTrigger 
-                value="replied" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-              >
-                <Reply className="w-4 h-4" />
-                <span className="text-sm font-medium">تم الرد</span>
-              </TabsTrigger>
-      
-              <TabsTrigger 
-                value="spam" 
-                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-              >
-                <AlertTriangle className="w-4 h-4" />
-                <span className="text-sm font-medium">مزعجة</span>
-                {stats.spam > 0 && (
-                  <Badge variant="destructive" className="text-xs h-5 min-w-[20px] px-1.5">
-                    {stats.spam}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </div>
-          </TabsList>
-      
-          {/* Scroll Indicators (optional) */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none lg:hidden" />
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none lg:hidden" />
-        </div>
+          <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-xl grid grid-cols-5 gap-1">
+    <TabsTrigger 
+      value="all" 
+      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
+    >
+      <Inbox className="w-4 h-4 shrink-0" />
+      <span className="text-[10px] sm:text-sm font-medium">الكل</span>
+      <Badge variant="secondary" className="text-[9px] sm:text-xs h-4 sm:h-5 min-w-[16px] sm:min-w-[20px] px-1 sm:px-1.5 absolute top-1 left-1 sm:static">
+        {stats.total}
+      </Badge>
+    </TabsTrigger>
+
+    <TabsTrigger 
+      value="unread" 
+      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
+    >
+      <Mail className="w-4 h-4 shrink-0" />
+      <span className="text-[10px] sm:text-sm font-medium">جديدة</span>
+      {stats.unread > 0 && (
+        <Badge className="bg-primary text-primary-foreground text-[9px] sm:text-xs h-4 sm:h-5 min-w-[16px] sm:min-w-[20px] px-1 sm:px-1.5 absolute top-1 left-1 sm:static">
+          {stats.unread}
+        </Badge>
+      )}
+    </TabsTrigger>
+
+    <TabsTrigger 
+      value="read" 
+      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
+    >
+      <MailOpen className="w-4 h-4 shrink-0" />
+      <span className="text-[10px] sm:text-sm font-medium hidden sm:inline">مقروءة</span>
+      <span className="text-[10px] sm:hidden">مقروء</span>
+    </TabsTrigger>
+
+    <TabsTrigger 
+      value="replied" 
+      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
+    >
+      <Reply className="w-4 h-4 shrink-0" />
+      <span className="text-[10px] sm:text-sm font-medium hidden sm:inline">تم الرد</span>
+      <span className="text-[10px] sm:hidden">رد</span>
+    </TabsTrigger>
+
+    <TabsTrigger 
+      value="spam" 
+      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
+    >
+      <AlertTriangle className="w-4 h-4 shrink-0" />
+      <span className="text-[10px] sm:text-sm font-medium hidden sm:inline">مزعجة</span>
+      <span className="text-[10px] sm:hidden">spam</span>
+      {stats.spam > 0 && (
+        <Badge variant="destructive" className="text-[9px] sm:text-xs h-4 sm:h-5 min-w-[16px] sm:min-w-[20px] px-1 sm:px-1.5 absolute top-1 left-1 sm:static">
+          {stats.spam}
+        </Badge>
+      )}
+    </TabsTrigger>
+  </TabsList>
       
         {/* Messages List - بدون تغيير */}
         <div className="mt-4">
