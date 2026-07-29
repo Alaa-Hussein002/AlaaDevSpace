@@ -272,109 +272,172 @@ export default function AdminMessages() {
 
       {/* Filters & Search */}
       <Card className="p-4 border-border/50">
-        <div className="flex flex-col lg:flex-row gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
           {/* Search */}
-          <div className="flex-1 relative">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <div className="lg:col-span-2 relative">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
-              placeholder="بحث في الرسائل (الاسم، البريد، الموضوع، المحتوى...)"
+              placeholder="بحث في الرسائل (الاسم، البريد، الموضوع...)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-10"
+              className="pr-10 h-10"
             />
           </div>
-
-          {/* Filters */}
-          <div className="flex gap-2 flex-wrap lg:flex-nowrap">
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full lg:w-[140px]">
-                <SelectValue placeholder="الحالة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="unread">جديدة</SelectItem>
-                <SelectItem value="read">مقروءة</SelectItem>
-                <SelectItem value="replied">تم الرد</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterPriority} onValueChange={setFilterPriority}>
-              <SelectTrigger className="w-full lg:w-[140px]">
-                <SelectValue placeholder="الأولوية" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الأولويات</SelectItem>
-                <SelectItem value="low">منخفضة</SelectItem>
-                <SelectItem value="medium">متوسطة</SelectItem>
-                <SelectItem value="high">عالية</SelectItem>
-                <SelectItem value="urgent">عاجلة</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
-              <SelectTrigger className="w-full lg:w-[140px]">
-                <SelectValue placeholder="الفئة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الفئات</SelectItem>
-                <SelectItem value="general">عام</SelectItem>
-                <SelectItem value="support">دعم فني</SelectItem>
-                <SelectItem value="sales">مبيعات</SelectItem>
-                <SelectItem value="feedback">ملاحظات</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {(searchQuery || filterStatus !== 'all' || filterPriority !== 'all' || filterCategory !== 'all') && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchQuery('');
-                  setFilterStatus('all');
-                  setFilterPriority('all');
-                  setFilterCategory('all');
-                }}
-                className="gap-2"
-              >
-                <XCircle className="w-4 h-4" />
-                مسح
-              </Button>
-            )}
-          </div>
+      
+          {/* Status Filter */}
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="الحالة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">جميع الحالات</SelectItem>
+              <SelectItem value="unread">جديدة</SelectItem>
+              <SelectItem value="read">مقروءة</SelectItem>
+              <SelectItem value="replied">تم الرد</SelectItem>
+            </SelectContent>
+          </Select>
+      
+          {/* Priority Filter */}
+          <Select value={filterPriority} onValueChange={setFilterPriority}>
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="الأولوية" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">جميع الأولويات</SelectItem>
+              <SelectItem value="low">منخفضة</SelectItem>
+              <SelectItem value="medium">متوسطة</SelectItem>
+              <SelectItem value="high">عالية</SelectItem>
+              <SelectItem value="urgent">عاجلة</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+      
+        {/* Active Filters & Clear Button */}
+        {(searchQuery || filterStatus !== 'all' || filterPriority !== 'all' || filterCategory !== 'all') && (
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
+            <span className="text-xs text-muted-foreground">الفلاتر النشطة:</span>
+            <div className="flex items-center gap-2 flex-wrap flex-1">
+              {searchQuery && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  بحث: {searchQuery}
+                  <button onClick={() => setSearchQuery('')} className="hover:text-red-500">
+                    <XCircle className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {filterStatus !== 'all' && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  الحالة: {filterStatus}
+                  <button onClick={() => setFilterStatus('all')} className="hover:text-red-500">
+                    <XCircle className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {filterPriority !== 'all' && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  الأولوية: {filterPriority}
+                  <button onClick={() => setFilterPriority('all')} className="hover:text-red-500">
+                    <XCircle className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {filterCategory !== 'all' && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  الفئة: {filterCategory}
+                  <button onClick={() => setFilterCategory('all')} className="hover:text-red-500">
+                    <XCircle className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchQuery('');
+                setFilterStatus('all');
+                setFilterPriority('all');
+                setFilterCategory('all');
+              }}
+              className="gap-2 h-8 shrink-0"
+            >
+              <XCircle className="w-4 h-4" />
+              مسح الكل
+            </Button>
+          </div>
+        )}
       </Card>
-
-      {/* Tabs */}
+      
+      {/* Tabs - محسّنة للموبايل */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
-          <TabsTrigger value="all" className="gap-2">
-            <Inbox className="w-4 h-4" />
-            <span className="hidden sm:inline">الكل</span>
-            <Badge variant="secondary" className="text-xs">{stats.total}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="unread" className="gap-2">
-            <Mail className="w-4 h-4" />
-            <span className="hidden sm:inline">جديدة</span>
-            {stats.unread > 0 && <Badge variant="default" className="text-xs">{stats.unread}</Badge>}
-          </TabsTrigger>
-          <TabsTrigger value="read" className="gap-2">
-            <MailOpen className="w-4 h-4" />
-            <span className="hidden sm:inline">مقروءة</span>
-          </TabsTrigger>
-          <TabsTrigger value="replied" className="gap-2">
-            <Reply className="w-4 h-4" />
-            <span className="hidden sm:inline">تم الرد</span>
-          </TabsTrigger>
-          <TabsTrigger value="spam" className="gap-2">
-            <AlertTriangle className="w-4 h-4" />
-            <span className="hidden sm:inline">مزعجة</span>
-            {stats.spam > 0 && <Badge variant="destructive" className="text-xs">{stats.spam}</Badge>}
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Messages List */}
+        {/* Tabs List - Scrollable on mobile */}
+        <div className="relative">
+          <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-xl overflow-x-auto scrollbar-hide">
+            <div className="flex gap-1 min-w-max">
+              <TabsTrigger 
+                value="all" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <Inbox className="w-4 h-4" />
+                <span className="text-sm font-medium">الكل</span>
+                <Badge variant="secondary" className="text-xs h-5 min-w-[20px] px-1.5">
+                  {stats.total}
+                </Badge>
+              </TabsTrigger>
+      
+              <TabsTrigger 
+                value="unread" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <Mail className="w-4 h-4" />
+                <span className="text-sm font-medium">جديدة</span>
+                {stats.unread > 0 && (
+                  <Badge className="bg-primary text-primary-foreground text-xs h-5 min-w-[20px] px-1.5">
+                    {stats.unread}
+                  </Badge>
+                )}
+              </TabsTrigger>
+      
+              <TabsTrigger 
+                value="read" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <MailOpen className="w-4 h-4" />
+                <span className="text-sm font-medium">مقروءة</span>
+              </TabsTrigger>
+      
+              <TabsTrigger 
+                value="replied" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <Reply className="w-4 h-4" />
+                <span className="text-sm font-medium">تم الرد</span>
+              </TabsTrigger>
+      
+              <TabsTrigger 
+                value="spam" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                <span className="text-sm font-medium">مزعجة</span>
+                {stats.spam > 0 && (
+                  <Badge variant="destructive" className="text-xs h-5 min-w-[20px] px-1.5">
+                    {stats.spam}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </div>
+          </TabsList>
+      
+          {/* Scroll Indicators (optional) */}
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none lg:hidden" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none lg:hidden" />
+        </div>
+      
+        {/* Messages List - بدون تغيير */}
         <div className="mt-4">
           {loading ? (
+            // ... الـ skeleton loader كما هو
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map(i => (
                 <Card key={i} className="p-4 border-border/50">
@@ -390,6 +453,7 @@ export default function AdminMessages() {
               ))}
             </div>
           ) : filteredMessages.length === 0 ? (
+            // ... رسالة "لا توجد رسائل" كما هي
             <Card className="p-16 text-center border-border/50">
               <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-10 h-10 text-muted-foreground/30" />
@@ -402,13 +466,14 @@ export default function AdminMessages() {
               </p>
             </Card>
           ) : (
+            // ... قائمة الرسائل كما هي (بدون تغيير)
             <div className="space-y-2">
               <AnimatePresence mode="popLayout">
                 {filteredMessages.map((msg, i) => {
                   const StatusIcon = statusConfig[msg.status]?.icon || Mail;
                   const CategoryIcon = categoryConfig[msg.category]?.icon || Inbox;
                   const priority = priorityConfig[msg.priority] || priorityConfig.medium;
-
+      
                   return (
                     <motion.div
                       key={msg.id}
@@ -424,12 +489,13 @@ export default function AdminMessages() {
                         } ${msg.priority === 'high' || msg.priority === 'urgent' ? 'border-r-4 border-r-orange-500' : ''}`}
                         onClick={() => openMessage(msg)}
                       >
+                        {/* ... باقي الكود كما هو بدون تغيير ... */}
                         <div className="flex items-start gap-4">
                           {/* Avatar/Icon */}
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${statusConfig[msg.status]?.bg || 'bg-muted'}`}>
                             <StatusIcon className={`w-6 h-6 ${statusConfig[msg.status]?.color || 'text-muted-foreground'}`} />
                           </div>
-
+      
                           {/* Content */}
                           <div className="flex-1 min-w-0 space-y-2">
                             {/* Header */}
@@ -453,7 +519,7 @@ export default function AdminMessages() {
                                   </Badge>
                                 )}
                               </div>
-
+      
                               {/* Actions */}
                               <div className="flex items-center gap-1 shrink-0">
                                 <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -478,11 +544,11 @@ export default function AdminMessages() {
                                       </DropdownMenuItem>
                                     )}
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={(e) => handleMarkAsSpam(msg.id, e)} className="gap-2 text-orange-600">  {/* ✅ */}
+                                    <DropdownMenuItem onClick={(e) => handleMarkAsSpam(msg.id, e)} className="gap-2 text-orange-600">
                                       <AlertTriangle className="w-4 h-4" />
                                       تأشير كمزعجة
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={(e) => handleDelete(msg.id, e)} className="gap-2 text-red-600">  {/* ✅ */}
+                                    <DropdownMenuItem onClick={(e) => handleDelete(msg.id, e)} className="gap-2 text-red-600">
                                       <Trash2 className="w-4 h-4" />
                                       حذف
                                     </DropdownMenuItem>
@@ -490,22 +556,22 @@ export default function AdminMessages() {
                                 </DropdownMenu>
                               </div>
                             </div>
-
+      
                             {/* Subject */}
                             <p className={`text-sm ${msg.status === 'unread' ? 'font-semibold' : 'font-medium'} text-foreground/90`}>
                               {msg.subject}
                             </p>
-
+      
                             {/* Message Preview */}
                             <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                               {msg.message}
                             </p>
-
+      
                             {/* Footer Info */}
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1 flex-wrap">
                               <span className="flex items-center gap-1">
                                 <Mail className="w-3 h-3" />
-                                {msg.email}
+                                <span className="truncate max-w-[150px]">{msg.email}</span>
                               </span>
                               {msg.phone && (
                                 <span className="flex items-center gap-1">
@@ -514,7 +580,7 @@ export default function AdminMessages() {
                                 </span>
                               )}
                               {msg.ip_address && (
-                                <span className="flex items-center gap-1">
+                                <span className="hidden sm:flex items-center gap-1">
                                   <MapPin className="w-3 h-3" />
                                   {msg.ip_address}
                                 </span>
@@ -522,11 +588,12 @@ export default function AdminMessages() {
                               {msg.replied_at && (
                                 <span className="flex items-center gap-1 text-green-600">
                                   <CheckCircle2 className="w-3 h-3" />
-                                  تم الرد {formatDate(msg.replied_at)}
+                                  <span className="hidden sm:inline">تم الرد {formatDate(msg.replied_at)}</span>
+                                  <span className="sm:hidden">رد ✓</span>
                                 </span>
                               )}
                             </div>
-
+      
                             {/* Attachments */}
                             {msg.attachments && msg.attachments.length > 0 && (
                               <div className="flex items-center gap-2 pt-2">
