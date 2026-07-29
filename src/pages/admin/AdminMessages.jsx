@@ -371,243 +371,251 @@ export default function AdminMessages() {
       {/* Tabs - محسّنة للموبايل */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tabs List - Scrollable on mobile */}
-          <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-xl grid grid-cols-5 gap-1">
-    <TabsTrigger 
-      value="all" 
-      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
-    >
-      <Inbox className="w-4 h-4 shrink-0" />
-      <span className="text-[10px] sm:text-sm font-medium">الكل</span>
-      <Badge variant="secondary" className="text-[9px] sm:text-xs h-4 sm:h-5 min-w-[16px] sm:min-w-[20px] px-1 sm:px-1.5 absolute top-1 left-1 sm:static">
-        {stats.total}
-      </Badge>
-    </TabsTrigger>
-
-    <TabsTrigger 
-      value="unread" 
-      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
-    >
-      <Mail className="w-4 h-4 shrink-0" />
-      <span className="text-[10px] sm:text-sm font-medium">جديدة</span>
-      {stats.unread > 0 && (
-        <Badge className="bg-primary text-primary-foreground text-[9px] sm:text-xs h-4 sm:h-5 min-w-[16px] sm:min-w-[20px] px-1 sm:px-1.5 absolute top-1 left-1 sm:static">
-          {stats.unread}
-        </Badge>
-      )}
-    </TabsTrigger>
-
-    <TabsTrigger 
-      value="read" 
-      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
-    >
-      <MailOpen className="w-4 h-4 shrink-0" />
-      <span className="text-[10px] sm:text-sm font-medium hidden sm:inline">مقروءة</span>
-      <span className="text-[10px] sm:hidden">مقروء</span>
-    </TabsTrigger>
-
-    <TabsTrigger 
-      value="replied" 
-      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
-    >
-      <Reply className="w-4 h-4 shrink-0" />
-      <span className="text-[10px] sm:text-sm font-medium hidden sm:inline">تم الرد</span>
-      <span className="text-[10px] sm:hidden">رد</span>
-    </TabsTrigger>
-
-    <TabsTrigger 
-      value="spam" 
-      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all min-h-[60px] sm:min-h-[44px]"
-    >
-      <AlertTriangle className="w-4 h-4 shrink-0" />
-      <span className="text-[10px] sm:text-sm font-medium hidden sm:inline">مزعجة</span>
-      <span className="text-[10px] sm:hidden">spam</span>
-      {stats.spam > 0 && (
-        <Badge variant="destructive" className="text-[9px] sm:text-xs h-4 sm:h-5 min-w-[16px] sm:min-w-[20px] px-1 sm:px-1.5 absolute top-1 left-1 sm:static">
-          {stats.spam}
-        </Badge>
-      )}
-    </TabsTrigger>
-  </TabsList>
+        <div className="relative">
+          <TabsList className="w-full h-auto p-1 bg-muted/50 rounded-xl overflow-x-auto scrollbar-hide">
+            <div className="flex gap-1 min-w-max">
+              <TabsTrigger 
+                value="all" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <Inbox className="w-4 h-4" />
+                <span className="text-sm font-medium">الكل</span>
+                <Badge variant="secondary" className="text-xs h-5 min-w-[20px] px-1.5">
+                  {stats.total}
+                </Badge>
+              </TabsTrigger>
+      
+              <TabsTrigger 
+                value="unread" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <Mail className="w-4 h-4" />
+                <span className="text-sm font-medium">جديدة</span>
+                {stats.unread > 0 && (
+                  <Badge className="bg-primary text-primary-foreground text-xs h-5 min-w-[20px] px-1.5">
+                    {stats.unread}
+                  </Badge>
+                )}
+              </TabsTrigger>
+      
+              <TabsTrigger 
+                value="read" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <MailOpen className="w-4 h-4" />
+                <span className="text-sm font-medium">مقروءة</span>
+              </TabsTrigger>
+      
+              <TabsTrigger 
+                value="replied" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <Reply className="w-4 h-4" />
+                <span className="text-sm font-medium">تم الرد</span>
+              </TabsTrigger>
+      
+              <TabsTrigger 
+                value="spam" 
+                className="flex items-center gap-2 px-4 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                <span className="text-sm font-medium">مزعجة</span>
+                {stats.spam > 0 && (
+                  <Badge variant="destructive" className="text-xs h-5 min-w-[20px] px-1.5">
+                    {stats.spam}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </div>
+          </TabsList>
+      
+          {/* Scroll Indicators (optional) */}
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none lg:hidden" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none lg:hidden" />
+        </div>
       
         {/* Messages List - بدون تغيير */}
-        <div className="mt-4">
-          {loading ? (
-            // ... الـ skeleton loader كما هو
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map(i => (
-                <Card key={i} className="p-4 border-border/50">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-muted animate-pulse" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-muted animate-pulse rounded w-1/4" />
-                      <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
-                      <div className="h-3 bg-muted animate-pulse rounded w-3/4" />
-                    </div>
+        {/* Messages List */}
+<div className="mt-4">
+  {loading ? (
+    <div className="space-y-3">
+      {[1, 2, 3, 4, 5].map(i => (
+        <Card key={i} className="w-full p-4 border-border/50">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-lg bg-muted animate-pulse shrink-0" />
+            <div className="flex-1 space-y-2 min-w-0">
+              <div className="h-4 bg-muted animate-pulse rounded w-1/4" />
+              <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
+              <div className="h-3 bg-muted animate-pulse rounded w-3/4" />
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  ) : filteredMessages.length === 0 ? (
+    <Card className="w-full p-16 text-center border-border/50">
+      <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+        <Mail className="w-10 h-10 text-muted-foreground/30" />
+      </div>
+      <h3 className="text-lg font-semibold mb-2">لا توجد رسائل</h3>
+      <p className="text-sm text-muted-foreground">
+        {searchQuery || filterStatus !== 'all' || filterPriority !== 'all' || filterCategory !== 'all'
+          ? 'لم يتم العثور على نتائج مطابقة للفلاتر المحددة'
+          : 'لم يتم استلام أي رسائل بعد'}
+      </p>
+    </Card>
+  ) : (
+    <div className="w-full space-y-2">
+      <AnimatePresence mode="popLayout">
+        {filteredMessages.map((msg, i) => {
+          const StatusIcon = statusConfig[msg.status]?.icon || Mail;
+          const CategoryIcon = categoryConfig[msg.category]?.icon || Inbox;
+          const priority = priorityConfig[msg.priority] || priorityConfig.medium;
+
+          return (
+            <motion.div
+              key={msg.id}
+              layout
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ delay: i * 0.02 }}
+              className="w-full" // ✅ إضافة
+            >
+              <Card
+                className={`w-full p-4 border-border/50 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all group ${
+                  msg.status === 'unread' ? 'bg-primary/[0.02] border-primary/20' : ''
+                } ${msg.priority === 'high' || msg.priority === 'urgent' ? 'border-r-4 border-r-orange-500' : ''}`}
+                onClick={() => openMessage(msg)}
+              >
+                <div className="flex items-start gap-3 sm:gap-4 w-full"> {/* ✅ تعديل */}
+                  {/* Avatar/Icon */}
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${statusConfig[msg.status]?.bg || 'bg-muted'}`}>
+                    <StatusIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${statusConfig[msg.status]?.color || 'text-muted-foreground'}`} />
                   </div>
-                </Card>
-              ))}
-            </div>
-          ) : filteredMessages.length === 0 ? (
-            // ... رسالة "لا توجد رسائل" كما هي
-            <Card className="p-16 text-center border-border/50">
-              <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                <Mail className="w-10 h-10 text-muted-foreground/30" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">لا توجد رسائل</h3>
-              <p className="text-sm text-muted-foreground">
-                {searchQuery || filterStatus !== 'all' || filterPriority !== 'all' || filterCategory !== 'all'
-                  ? 'لم يتم العثور على نتائج مطابقة للفلاتر المحددة'
-                  : 'لم يتم استلام أي رسائل بعد'}
-              </p>
-            </Card>
-          ) : (
-            // ... قائمة الرسائل كما هي (بدون تغيير)
-            <div className="space-y-2">
-              <AnimatePresence mode="popLayout">
-                {filteredMessages.map((msg, i) => {
-                  const StatusIcon = statusConfig[msg.status]?.icon || Mail;
-                  const CategoryIcon = categoryConfig[msg.category]?.icon || Inbox;
-                  const priority = priorityConfig[msg.priority] || priorityConfig.medium;
-      
-                  return (
-                    <motion.div
-                      key={msg.id}
-                      layout
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ delay: i * 0.02 }}
-                    >
-                      <Card
-                        className={`p-4 border-border/50 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all group ${
-                          msg.status === 'unread' ? 'bg-primary/[0.02] border-primary/20' : ''
-                        } ${msg.priority === 'high' || msg.priority === 'urgent' ? 'border-r-4 border-r-orange-500' : ''}`}
-                        onClick={() => openMessage(msg)}
-                      >
-                        {/* ... باقي الكود كما هو بدون تغيير ... */}
-                        <div className="flex items-start gap-4">
-                          {/* Avatar/Icon */}
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${statusConfig[msg.status]?.bg || 'bg-muted'}`}>
-                            <StatusIcon className={`w-6 h-6 ${statusConfig[msg.status]?.color || 'text-muted-foreground'}`} />
-                          </div>
-      
-                          {/* Content */}
-                          <div className="flex-1 min-w-0 space-y-2">
-                            {/* Header */}
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className={`text-sm font-semibold ${msg.status === 'unread' ? 'text-foreground' : 'text-foreground/80'}`}>
-                                  {msg.name}
-                                </h3>
-                                <Badge variant="outline" className="text-xs">
-                                  {statusConfig[msg.status]?.label}
-                                </Badge>
-                                {msg.priority && (
-                                  <Badge className={`text-xs text-white ${priority.color}`}>
-                                    {priority.label}
-                                  </Badge>
-                                )}
-                                {msg.category && (
-                                  <Badge variant="secondary" className="text-xs gap-1">
-                                    <CategoryIcon className="w-3 h-3" />
-                                    {categoryConfig[msg.category]?.label}
-                                  </Badge>
-                                )}
-                              </div>
-      
-                              {/* Actions */}
-                              <div className="flex items-center gap-1 shrink-0">
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {formatDate(msg.created_at)}
-                                </span>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <MoreVertical className="w-4 h-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => openMessage(msg)} className="gap-2">
-                                      <Eye className="w-4 h-4" />
-                                      عرض
-                                    </DropdownMenuItem>
-                                    {msg.status !== 'replied' && (
-                                      <DropdownMenuItem onClick={() => openMessage(msg)} className="gap-2">
-                                        <Reply className="w-4 h-4" />
-                                        رد
-                                      </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={(e) => handleMarkAsSpam(msg.id, e)} className="gap-2 text-orange-600">
-                                      <AlertTriangle className="w-4 h-4" />
-                                      تأشير كمزعجة
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={(e) => handleDelete(msg.id, e)} className="gap-2 text-red-600">
-                                      <Trash2 className="w-4 h-4" />
-                                      حذف
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </div>
-      
-                            {/* Subject */}
-                            <p className={`text-sm ${msg.status === 'unread' ? 'font-semibold' : 'font-medium'} text-foreground/90`}>
-                              {msg.subject}
-                            </p>
-      
-                            {/* Message Preview */}
-                            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                              {msg.message}
-                            </p>
-      
-                            {/* Footer Info */}
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1 flex-wrap">
-                              <span className="flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
-                                <span className="truncate max-w-[150px]">{msg.email}</span>
-                              </span>
-                              {msg.phone && (
-                                <span className="flex items-center gap-1">
-                                  <PhoneCall className="w-3 h-3" />
-                                  {msg.phone}
-                                </span>
-                              )}
-                              {msg.ip_address && (
-                                <span className="hidden sm:flex items-center gap-1">
-                                  <MapPin className="w-3 h-3" />
-                                  {msg.ip_address}
-                                </span>
-                              )}
-                              {msg.replied_at && (
-                                <span className="flex items-center gap-1 text-green-600">
-                                  <CheckCircle2 className="w-3 h-3" />
-                                  <span className="hidden sm:inline">تم الرد {formatDate(msg.replied_at)}</span>
-                                  <span className="sm:hidden">رد ✓</span>
-                                </span>
-                              )}
-                            </div>
-      
-                            {/* Attachments */}
-                            {msg.attachments && msg.attachments.length > 0 && (
-                              <div className="flex items-center gap-2 pt-2">
-                                <Download className="w-4 h-4 text-primary" />
-                                <span className="text-xs text-primary font-medium">
-                                  {msg.attachments.length} مرفق
-                                </span>
-                              </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0 space-y-2"> {/* ✅ flex-1 min-w-0 مهمة */}
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-2 w-full"> {/* ✅ w-full */}
+                      <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0"> {/* ✅ flex-1 min-w-0 */}
+                        <h3 className={`text-sm font-semibold truncate ${msg.status === 'unread' ? 'text-foreground' : 'text-foreground/80'}`}>
+                          {msg.name}
+                        </h3>
+                        <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0">
+                          {statusConfig[msg.status]?.label}
+                        </Badge>
+                        {msg.priority && (
+                          <Badge className={`text-[10px] sm:text-xs text-white ${priority.color} shrink-0`}>
+                            {priority.label}
+                          </Badge>
+                        )}
+                        {msg.category && (
+                          <Badge variant="secondary" className="text-[10px] sm:text-xs gap-1 shrink-0 hidden sm:inline-flex">
+                            <CategoryIcon className="w-3 h-3" />
+                            {categoryConfig[msg.category]?.label}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1 hidden sm:flex">
+                          <Clock className="w-3 h-3" />
+                          {formatDate(msg.created_at)}
+                        </span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openMessage(msg)} className="gap-2">
+                              <Eye className="w-4 h-4" />
+                              عرض
+                            </DropdownMenuItem>
+                            {msg.status !== 'replied' && (
+                              <DropdownMenuItem onClick={() => openMessage(msg)} className="gap-2">
+                                <Reply className="w-4 h-4" />
+                                رد
+                              </DropdownMenuItem>
                             )}
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={(e) => handleMarkAsSpam(msg.id, e)} className="gap-2 text-orange-600">
+                              <AlertTriangle className="w-4 h-4" />
+                              تأشير كمزعجة
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => handleDelete(msg.id, e)} className="gap-2 text-red-600">
+                              <Trash2 className="w-4 h-4" />
+                              حذف
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+
+                    {/* Subject */}
+                    <p className={`text-sm ${msg.status === 'unread' ? 'font-semibold' : 'font-medium'} text-foreground/90 line-clamp-1`}>
+                      {msg.subject}
+                    </p>
+
+                    {/* Message Preview */}
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                      {msg.message}
+                    </p>
+
+                    {/* Footer Info */}
+                    <div className="flex items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground pt-1 flex-wrap">
+                      <span className="flex items-center gap-1 flex-1 min-w-0">
+                        <Mail className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{msg.email}</span>
+                      </span>
+                      {msg.phone && (
+                        <span className="flex items-center gap-1 shrink-0">
+                          <PhoneCall className="w-3 h-3" />
+                          <span className="hidden sm:inline">{msg.phone}</span>
+                        </span>
+                      )}
+                      {msg.ip_address && (
+                        <span className="hidden lg:flex items-center gap-1 shrink-0">
+                          <MapPin className="w-3 h-3" />
+                          {msg.ip_address}
+                        </span>
+                      )}
+                      {msg.replied_at && (
+                        <span className="flex items-center gap-1 text-green-600 shrink-0">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span className="hidden sm:inline">تم الرد {formatDate(msg.replied_at)}</span>
+                          <span className="sm:hidden">رد ✓</span>
+                        </span>
+                      )}
+                      {/* Mobile - Show date */}
+                      <span className="flex sm:hidden items-center gap-1 text-muted-foreground shrink-0 mr-auto">
+                        <Clock className="w-3 h-3" />
+                        {formatDate(msg.created_at)}
+                      </span>
+                    </div>
+
+                    {/* Attachments */}
+                    {msg.attachments && msg.attachments.length > 0 && (
+                      <div className="flex items-center gap-2 pt-2">
+                        <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+                        <span className="text-[10px] sm:text-xs text-primary font-medium">
+                          {msg.attachments.length} مرفق
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </div>
+  )}
+</div>
       </Tabs>
 
       {/* Message Details Dialog */}
